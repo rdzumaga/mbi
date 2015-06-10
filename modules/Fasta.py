@@ -7,7 +7,8 @@ seqk="ACTTATCA"
 
 seqRef="CCATCGCCATCGG"
 #seq="GCATCGGC"
-seq="ACATCTCCAGCG"
+#seq="ACATCTCCAGCG"
+seq="CTCGCACATGG"
 
 
 
@@ -177,8 +178,10 @@ def rescoreDiagonals(blosum,bestDiagonals,hotspotRows):
 	print rescoredDiagonals			
 	#iterate over diagonals and score the with blosum matrix
 	for diag in bestDiagonals:
-		for row in hotspotRows:
+		for row in hotspotRows[diag]:
 			col=row-diag
+			print "row=", row, "col=", col, "diag=", diag
+			#print "blosum(seq[", row,"], seqRef[", col,"]= blosum[", seq[row], seq[col],"]"
 			rescoredDiagonals[diag]+=blosum[(seq[row], seqRef[col])]
 		
 	

@@ -107,6 +107,8 @@
 'Main Menu': 'Menu główne',
 'Manage Cache': 'Manage Cache',
 'Menu Model': 'Model menu',
+'Musisz podać AGCT': 'Musisz podać AGCT',
+'Musisz podać liczbę': 'Musisz podać liczbę',
 'My Sites': 'My Sites',
 'Name': 'Nazwa',
 'New Record': 'Nowy rekord',

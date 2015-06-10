@@ -8,6 +8,24 @@
 ## - download is for downloading files uploaded in the db (does streaming)
 #########################################################################
 
+import NW
+
+def algorithm():
+
+    form=FORM('Sekwencja A:', INPUT(_name='seqA', _type='text', requires = IS_ALPHANUMERIC(error_message='Musisz podać AGCT')),
+              'Sekwencja B:', INPUT(_name='seqB', _type='text', requires = [IS_ALPHANUMERIC(error_message='Musisz podać AGCT')]),
+              'Kara za przerwę:', INPUT(_name='break_penalty', requires=IS_INT_IN_RANGE(-10, 11,error_message='Musisz podać liczbę')),
+              'Praca krokowa:', INPUT(_name='step',value=False,_type='checkbox'),
+              INPUT(_type='submit'))
+
+    if form.accepts(request.vars, session, keepvalues=True):
+        d=NW.readBlosum("blosum.txt")
+
+    
+    
+    return dict(form=form, d=d)
+
+
 def index():
     """
     example action using the internationalization operator T and flash
@@ -55,5 +73,3 @@ def call():
     supports xml, json, xmlrpc, jsonrpc, amfrpc, rss, csv
     """
     return service()
-
-

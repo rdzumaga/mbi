@@ -1,0 +1,71 @@
+{{extend 'layout.html'}}
+<h1>Algorytm Needlemana-WENSZA &#x1F40D;</h1>
+
+
+{{=form}}
+
+{{=d}}
+
+<!--
+{{=BEAUTIFY(response._vars)}}
+
+<h2>Podaj parametry</h2>
+<form enctype="multipart/form-data"
+      action="{{=URL()}}" method="post">
+Sekwencja A:
+<input name="seqA" />
+{{INPUT(_name='seqA', requires=IS_IN_SET(['a','c','g','t'],error_message='test message'))}}
+Sekwencja B:
+<input name="seqB" />
+
+Kara za przerwę:
+<input name="penaltybreak" />
+
+
+<input type="submit" />
+</form>-->
+
+<table class="table table-bordered table-condensed table-hover" style="text-align:center;">
+    <thead style="text-align:center;">
+        <tr>
+            <th></th>
+            <th>A</th>
+            <th>G</th>
+            <th>C</th>
+            <th>T</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <th>A</th>
+            <td>10</td>
+            <td>-1</td>
+            <td>-3</td>
+            <td>-4</td>
+        </tr>
+        <tr>
+            <th>G</th>
+            <td>-1</td>
+            <td>7</td>
+            <td>-5</td>
+            <td>-3</td>
+        </tr>
+        <tr>
+            <th>C</th>
+            <td>-3</td>
+            <td>-5</td>
+            <td>9</td>
+            <td>0</td>
+        </tr>
+        <tr>
+            <th>T</th>
+            <td>-4</td>
+            <td>-3</td>
+            <td>0</td>
+            <td>8</td>
+        </tr>
+    </tbody>
+</table>
+
+<h2>Wprowadzone dane:</h2>
+{{=BEAUTIFY(request.vars)}}
