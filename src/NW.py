@@ -4,7 +4,7 @@ seq="GATTA"
 penalty=-5
 
 # Create an empty matrix
-def create_matrix(m, n):
+def createMatrix(m, n):
     return [[0]*n for _ in xrange(m)]
 
 # Read the BLOSUM50 table
@@ -22,12 +22,12 @@ def readBlosum(fname):
             d[(a1, a2)] = int(score)
     return d
 
-def needlemanWunsch(seqVertical, seqHorizontal, blosum, penalty):
+def calcMatrix(seqVertical, seqHorizontal, blosum, penalty):
     rows = len(seqVertical)+1 
     cols = len(seqHorizontal)+1 
     
-    F = create_matrix(rows, cols)
- 
+    F = createMatrix(rows, cols)
+	
     for i in range(0, rows):
         F[i][0] = i * penalty
     for j in range(0, cols):
@@ -38,12 +38,13 @@ def needlemanWunsch(seqVertical, seqHorizontal, blosum, penalty):
             match = F[i-1][j-1] + blosum[(seqVertical[i-1], seqHorizontal[j-1])]
             delete = F[i-1][j] + penalty
             insert = F[i][j-1] + penalty
+
             F[i][j] = max(match, delete, insert)
  
     return F
 
 
-def traceback(scoreMatrix, startPos, blosum):
+def traceback(seq, seqRef, scoreMatrix, startPos, blosum,penalty):
     '''Find the optimal path through the matrix representing the alignment.
 
     Starting from the best position (bottom right of a path), trace the whole path
@@ -60,7 +61,7 @@ def traceback(scoreMatrix, startPos, blosum):
     alignedSeq = []
     alignedSeqRef = []
     i, j         = startPos
-    step         = nextStep(scoreMatrix, i, j,blosum)
+    step         = nextStep(seq, seqRef, scoreMatrix, i, j,blosum, penalty)
     
     while step != END:
         if step == DIAG:
@@ -77,17 +78,16 @@ def traceback(scoreMatrix, startPos, blosum):
             alignedSeqRef.append(seqRef[j - 1])
             j -= 1
        
-        step = nextStep(scoreMatrix, i, j,blosum)
+        step = nextStep(seq, seqRef, scoreMatrix, i, j,blosum, penalty)
        
     return ''.join(reversed(alignedSeq)), ''.join(reversed(alignedSeqRef))
 
 
-def nextStep(scoreMatrix, i, j, blosum):
+def nextStep(seq, seqRef, scoreMatrix, i, j, blosum, penalty):
     score=scoreMatrix[i][j]
     diag = scoreMatrix[i - 1][j - 1]
     up   = scoreMatrix[i - 1][j]
     left = scoreMatrix[i][j - 1]
-
     similarity=blosum[(seq[i-1], seqRef[j-1])]
 
     if(score==diag+similarity):
@@ -146,18 +146,20 @@ def print_matrix(matrix):
             print('{0:>4}'.format(col)),
         print
 
-print "---------NW-----\n"
-d=readBlosum("blosum.txt")
+def needlemanWunsch(seq="GATTA", seqRef="GAATTC", penalty=-5, i=0):
+    blosum=readBlosum("blosum.txt")
+    print blosum
+    matrix=calcMatrix(seq, seqRef, blosum, penalty)
+    print_matrix(matrix)
+    rightBottomCell=(len(seq), len(seqRef))
+    seqAligned, seqRefAligned = traceback(seq, seqRef, matrix, rightBottomCell, blosum, penalty)
+    print
+    print seqAligned
+    print seqRefAligned
+    if i>0:
+        return matrix
+    else:
+        return seqAligned, seqRefAligned
+    
+    
 
-print "Comparing:"
-print " "+ seqRef
-for l in seq:
-    print l
-print
-
-matrix=needlemanWunsch(seq,seqRef, d, penalty)
-print_matrix(matrix)
-rightBottomCell=(len(seq), len(seqRef))
-seqAligned, seqRefAligned = traceback(matrix, rightBottomCell, d)
-print seqRefAligned
-print seqAligned
