@@ -1,7 +1,7 @@
 
-seqRef="GAATTC"
-seq="GATTA"
-penalty=-5
+#seqRef="GAATTC"
+#seq="GATTA"
+#penalty=-5
 
 # Create an empty matrix
 def createMatrix(m, n):
@@ -148,14 +148,14 @@ def print_matrix(matrix):
 
 def needlemanWunsch(seq="GATTA", seqRef="GAATTC", penalty=-5, i=0):
     blosum=readBlosum("blosum.txt")
-    print blosum
+    #print blosum
     matrix=calcMatrix(seq, seqRef, blosum, penalty)
     print_matrix(matrix)
     rightBottomCell=(len(seq), len(seqRef))
     seqAligned, seqRefAligned = traceback(seq, seqRef, matrix, rightBottomCell, blosum, penalty)
-    print
-    print seqAligned
-    print seqRefAligned
+    #print
+    #print seqAligned
+    #print seqRefAligned
     if i>0:
         return matrix
     else:

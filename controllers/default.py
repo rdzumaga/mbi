@@ -11,6 +11,8 @@
 import NW
 
 def algorithm():
+    
+    d = ""
 
     form=FORM('Sekwencja A:', INPUT(_name='seqA', _type='text', requires = IS_ALPHANUMERIC(error_message='Musisz podać AGCT')),
               'Sekwencja B:', INPUT(_name='seqB', _type='text', requires = [IS_ALPHANUMERIC(error_message='Musisz podać AGCT')]),
@@ -19,11 +21,14 @@ def algorithm():
               INPUT(_type='submit'))
 
     if form.accepts(request.vars, session, keepvalues=True):
-        d=NW.readBlosum("blosum.txt")
+        d=NW.needlemanWunsch(request.vars.seqA,request.vars.seqB, request.vars.break_penalty, 0)
 
     
     
+    
     return dict(form=form, d=d)
+    
+    
 
 
 def index():
