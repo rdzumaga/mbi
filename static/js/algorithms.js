@@ -100,7 +100,7 @@ function checkStepMode() {
     if(document.getElementById("checkBox").checked)
     {
         if (document.getElementById("iters").value == -1){
-            document.getElementById("iters").value=0;
+            document.getElementById("iters").value=1;
         }
         else{
             var iters = parseInt(document.getElementById("iters").value) + 1;
