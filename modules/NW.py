@@ -201,12 +201,12 @@ def needlemanWunsch(step=0, seq="GATTA", seqRef="GAATTC", penalty=-5):
                                  
     if step>0 and step<len(seq)*len(seqRef)-1:
         matrix, steps=calcMatrixStepByStep(seq, seqRef, blosum, penalty, step)
-        return steps
+        return matrix, steps, "", ""
         
     matrix =calcMatrix(seq, seqRef, blosum, penalty)
     rightBottomCell=(len(seq), len(seqRef))
     seqAligned, seqRefAligned = traceback(seq, seqRef, matrix, rightBottomCell, blosum, penalty)
-    return matrix, seqAligned, seqRefAligned
+    return matrix, [], seqAligned, seqRefAligned
     
 
 
