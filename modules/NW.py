@@ -150,7 +150,7 @@ def needlemanWunsch(seq="GATTA", seqRef="GAATTC", penalty=-5, i=0):
     blosum=readBlosum("blosum.txt")
     #print blosum
     matrix=calcMatrix(seq, seqRef, blosum, penalty)
-    print_matrix(matrix)
+    ##print_matrix(matrix)
     rightBottomCell=(len(seq), len(seqRef))
     seqAligned, seqRefAligned = traceback(seq, seqRef, matrix, rightBottomCell, blosum, penalty)
     #print

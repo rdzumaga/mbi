@@ -14,14 +14,21 @@ def algorithm():
     
     d = ""
 
-    form=FORM('Sekwencja A:', INPUT(_name='seqA', _type='text', requires = IS_ALPHANUMERIC(error_message='Musisz podać AGCT')),
-              'Sekwencja B:', INPUT(_name='seqB', _type='text', requires = [IS_ALPHANUMERIC(error_message='Musisz podać AGCT')]),
-              'Kara za przerwę:', INPUT(_name='break_penalty', requires=IS_INT_IN_RANGE(-10, 11,error_message='Musisz podać liczbę')),
-              'Praca krokowa:', INPUT(_name='step',value=False,_type='checkbox'),
-              INPUT(_type='submit'))
+    form=FORM(DIV(LABEL('Sekwencja A:', XML("&nbsp;"), _for="seqA"), INPUT(_id='seqA', _name='seqA', _type='text', requires = IS_ALPHANUMERIC(error_message='Musisz podać AGCT'), _class='form-control', _placeholder = 'np. AAGCT'), _class='form-group'),XML("&nbsp;"),
+              
+              DIV(LABEL('Sekwencja B:', XML("&nbsp;"), _for="seqB"), INPUT(_id='seqB', _name='seqB', _type='text', requires = [IS_ALPHANUMERIC(error_message='Musisz podać AGCT')], _class='form-control', _placeholder = 'np. AAGCT'), _class='form-group'), XML("&nbsp;"),
+              
+              DIV(LABEL('Kara za przerwę:', XML("&nbsp;"), _for="break_penalty"), INPUT(_id='break_penalty', _name='break_penalty', requires=IS_INT_IN_RANGE(-10, 11,error_message='Musisz podać liczbę'), _class='form-control', _placeholder = 'np. -2'), _class='form-group'),XML("&nbsp;"),
+              
+              DIV(LABEL(B('Praca krokowa:'), XML("&nbsp;"), INPUT(_name='step',value=False,_type='checkbox',_class='checkbox')), _class = 'checkbox form-group' ),XML("&nbsp;"),
+              
+              INPUT(_type='submit', _class='btn btn-success', _value='Start'))
+    
+    form['_class']='form-inline'
 
     if form.accepts(request.vars, session, keepvalues=True):
-        d=NW.needlemanWunsch(request.vars.seqA,request.vars.seqB, request.vars.break_penalty, 0)
+        x = int(request.vars.break_penalty)
+        d=NW.needlemanWunsch(request.vars.seqA,request.vars.seqB, x, 0)
 
     
     
