@@ -99,7 +99,13 @@ function removeWarning(seq) {
 function checkStepMode() {
     if(document.getElementById("checkBox").checked)
     {
-        document.getElementById("iters").value=0;
+        if (document.getElementById("iters").value == -1){
+            document.getElementById("iters").value=0;
+        }
+        else{
+            var iters = parseInt(document.getElementById("iters").value) + 1;
+            document.getElementById("iters").value = iters;
+        }
     }
     else document.getElementById("iters").value=-1;
 }
