@@ -1,3 +1,9 @@
+import argparse
+import os
+import re
+import sys
+import unittest
+
 
 # Create an empty matrix
 def create_matrix(m, n):
@@ -18,55 +24,18 @@ def readBlosum(fname):
             d[(a1, a2)] = int(score)
     return d
 
-def needlemanWunsch(seqVertical, seqHorizontal, blosum, penalty):
-    rows = len(seqVertical)+1 
-    cols = len(seqHorizontal)+1 
 
      
-    F = create_matrix(rows, cols)
- 
-    for i in range(0, rows):
-        F[i][0] = i * penalty
-    for j in range(0, cols):
-        F[0][j] = j * penalty
- 
-    for i in range(1, rows):
-        for j in range(1, cols):
-            match = F[i-1][j-1] + blosum[(seqVertical[i-1], seqHorizontal[j-1])]
-            delete = F[i-1][j] + penalty
-            insert = F[i][j-1] + penalty
-            F[i][j] = max(match, delete, insert)
- 
-    return F
 
 
-def SmithWaterman(seqIn,seqRef, penalty):
-    rows=len(seqIn)+1
-    cols=len(seqRef)+1
-
-    for i in range(0, rows):
-        F[i][0] = i * penalty
-    for j in range(0, cols):
-        F[0][j] = j * penalty
-
-    F = create_matrix(rows, cols)
-     
 
 
-import argparse
-import os
-import re
-import sys
-import unittest
 
 
-match    = 5
-mismatch = -3
-penalty      = -4
 seq02= "GAAAGAT" #horizontal
 seq01 = "GATGAA"#vertical
-seqRef= "GGCTCAATCA"
-seq= "ACCTAAGG"
+#seqRef= "GGCTCAATCA"
+#seq= "ACCTAAGG"
 #seq = 'AGCACACA'
 #seqRef = 'ACACACTA'
 seq02 = "FTFTALILLAVAV"
@@ -78,23 +47,25 @@ seq01 = "GACTTAC"#vertical
 
 #---------------functions--------------------
 
-def createScoreMatrix(rows, cols):
+def createScoreMatrix(seq, seqRef, penalty, match, mismatch):
     '''Create a matrix and fill it with values representing possible alignments of two sequences
 
     Best alignment can be found by locating a path in the matrix (when represenet as a 2D graph)
     with highest cumulative score. 
     '''
+    rows=len(seq)+1
+    cols=len(seqRef)+1
     
     #initialize the matrix with 0
     scoreMatrix = [[0 for col in range(cols)] for row in range(rows)]
-
+   
     maxScore = 0
     bestPos   = None    # i and j index for matrix cell with highest score
     
     # Fill the scoring matrix.
     for i in range(1, rows):
         for j in range(1, cols):
-            score = calcScore(scoreMatrix, i, j)
+            score = calcScore(seq, seqRef, scoreMatrix, i, j, penalty, match, mismatch)
             if score > maxScore:
                 maxScore = score
                 bestPos   = (i, j)
@@ -105,7 +76,7 @@ def createScoreMatrix(rows, cols):
     return scoreMatrix, bestPos
 
 
-def calcScore(matrix, i, j):
+def calcScore(seq, seqRef, matrix, i, j, penalty, match, mismatch):
     '''Calculate score for a given position in the scoring matrix.
 
     The score is based on the up, left, and upper-left neighbors.
@@ -118,7 +89,12 @@ def calcScore(matrix, i, j):
 
     return max(0, diagScore, upScore, leftScore)
 
-def traceback(scoreMatrix, startPos):
+def calcMatrixStepByStep():
+	
+	return [5]
+	
+	
+def traceback(scoreMatrix, startPos, seq, seqRef, penalty, match, mismatch):
     '''Find the optimal path through the matrix representing the alignment.
 
     Starting from the best position (bottom right of a path), trace the whole path
@@ -135,7 +111,7 @@ def traceback(scoreMatrix, startPos):
     alignedSeq = []
     alignedSeqRef = []
     i, j         = startPos
-    step         = nextStep(scoreMatrix, i, j)
+    step         = nextStep(scoreMatrix, i, j, seq, seqRef, penalty, match, mismatch)
     
     while step != END:
         if step == DIAG:
@@ -152,12 +128,12 @@ def traceback(scoreMatrix, startPos):
             alignedSeqRef.append(seqRef[j - 1])
             j -= 1
        
-        step = nextStep(scoreMatrix, i, j)
+        step = nextStep(scoreMatrix, i, j, seq, seqRef, penalty, match, mismatch)
        
     return ''.join(reversed(alignedSeq)), ''.join(reversed(alignedSeqRef))
 
 
-def nextStep(scoreMatrix, i, j):
+def nextStep(scoreMatrix, i, j, seq, seqRef, penalty, match, mismatch):
     score=scoreMatrix[i][j]
     diag = scoreMatrix[i - 1][j - 1]
     up   = scoreMatrix[i - 1][j]
@@ -255,8 +231,66 @@ class ScoreMatrixTest(unittest.TestCase):
         matrixToTestest, bestPos = createScoreMatrix(rows, cols)
         self.assertEqual(knownMatrix, matrixToTest)
 
-        
+		
+def printMatrix(matrix,seq, seqRef):
+    #print ref sequence's nukleotides
+    rows=len(seq)
+    cols=len(seqRef)
+    print
+    print"         ",
+    for n in range(cols):
+        print seqRef[n], "  ",
+    print
+    i=0
+    for row in matrix:
+        if(row>0):
+            print seq[i-1],
+        else:
+            print "    ",
+        i+=1
+        for col in row:
+            #if col!=0:
+            print ('{0:>4}'.format(col)),
+            #else:
+               # print "    ",
+        print
+		
+#-4,5, -3	
+seq02= "CGTGAATTCAT" #horizontal
+seq01 = "GACTTAC"#vertical
+def SmithWaterman(step=0, seq="GACTTAC", seqRef="CGTGAATTCAT", penalty=-4, match=5, mismatch=-3):
+    rows=len(seq)+1
+    cols=len(seqRef)+1
+    matrix=[]
+	
+    if step>0 and step<len(seqRef)-1:
+        matrix, steps=calcMatrixStepByStep()
+        return steps
+	
+    scoreMatrix, bestPos = createScoreMatrix(seq, seqRef, penalty, match, mismatch)
 
+    print_matrix(scoreMatrix)
+    print
+    printMatrix(scoreMatrix, seq, seqRef)
+    print
+    
+    # Traceback. Find the optimal path through the scoring matrix. This path
+    # corresponds to the optimal local sequence alignment.
+    seqAligned, seqRefAligned = traceback(scoreMatrix, bestPos, seq, seqRef, penalty, match, mismatch)
+    assert len(seqAligned) == len(seqRefAligned), 'aligned strings are not the same size'
+
+    print "***************stats**************"
+    print "seq=", seq, "rows=", len(seq), "seq is vertical and string in"
+    print "seqRef=", seqRef,"cols=len(seqRef), seqRef is horizontal and string ref"
+    print "seqAligned=   ",seqAligned
+    print "seqRefAligned=",seqRefAligned
+    print "*********************************"
+
+	
+      
+
+SmithWaterman()	  
+""""
 #------------------------------------
 try:
     t=1
@@ -306,5 +340,5 @@ for i in range(0, alength, 60):
     print()
 
 strG = str(raw_input("Genome sequence: "))
-
+"""
 
