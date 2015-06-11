@@ -111,7 +111,6 @@ def traceback(seq, seqRef, scoreMatrix, startPos, blosum,penalty):
     alignedSeqRef = []
     i, j         = startPos
     step         = nextStep(seq, seqRef, scoreMatrix, i, j,blosum, penalty)
-    
     while step != END:
         if step == DIAG:
             alignedSeq.append(seq[i - 1])
@@ -126,13 +125,15 @@ def traceback(seq, seqRef, scoreMatrix, startPos, blosum,penalty):
             alignedSeq.append('-')
             alignedSeqRef.append(seqRef[j - 1])
             j -= 1
-       
         step = nextStep(seq, seqRef, scoreMatrix, i, j,blosum, penalty)
        
     return ''.join(reversed(alignedSeq)), ''.join(reversed(alignedSeqRef))
 
 
 def nextStep(seq, seqRef, scoreMatrix, i, j, blosum, penalty):
+    if(i==0 or j==0):
+        return 0
+
     score=scoreMatrix[i][j]
     diag = scoreMatrix[i - 1][j - 1]
     up   = scoreMatrix[i - 1][j]
@@ -145,8 +146,6 @@ def nextStep(seq, seqRef, scoreMatrix, i, j, blosum, penalty):
         return 2
     if (score==left+penalty):
         return 3
-
-    return 0
 
 def createAlignmentString(alignedSeq, alignedSeqRef):
     '''Construct a special string showing identities, gaps, and mismatches.
