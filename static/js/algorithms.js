@@ -11,22 +11,18 @@ function addButton() {
     };
 }
 
-
-
 function sequenceValidation() {
     var seqA = document.getElementById("seqA");
     var seqB = document.getElementById("seqB");
     var ok = true;
-    if (!seqA.value.toUpperCase().match("ACTG")) {
-        seqA.className = "form-control nonValidate";
+    if (seqA.value=="" || !(/^[ACTG]*$/.test(seqA.value.toUpperCase()))) {
         addWarning('A');
         ok = false;
     }
     else {
         removeWarning('A');
     }
-    if (!seqB.value.toUpperCase().match("ACTG")) {
-        seqB.className = "form-control nonValidate";
+    if (seqB.value=="" || !(/^[ACTG]*$/.test(seqB.value.toUpperCase()))) {
         addWarning('B');
         ok = false;
     }
@@ -62,11 +58,13 @@ function addWarning(seq) {
 }
 
 function removeWarning(seq) {
+    var errorA = document.getElementById('errorA');
+    var errorB = document.getElementById('errorB');
     var div = document.createElement('div');
-    if (seq == 'A') {
-        document.getElementById('errorA').innerHTML= "";
+    if (seq == 'A' && errorA) {
+        errorA.innerHTML= "";
     }
-    else {
-        document.getElementById('errorB').innerHTML= "";
+    else if(errorB) {
+        errorB.innerHTML= "";
     }
 }
