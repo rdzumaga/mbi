@@ -121,15 +121,13 @@ function addValueToMatrix(){
         var id = "values" + i;
         var val = document.getElementById(id).value;
         var arrayVal = getArray(val);
-        //var x = arrayVal.split(", ");
         var cellId = "cell" + i;
-       // document.getElementById(cellId).innerText = val;
-         document.getElementById(cellId).innerHTML = arrayVal[0];
+         document.getElementById(cellId).innerHTML = arrayVal[3] + "<br/>" + arrayVal[4] +  "<br/>" + arrayVal[5] ;
     }
 }
 
 function getArray(val){
     var str = val.substring(1, val.length-1);
     var array = str.split(", ");
-        return array;
+    return array;
 }
