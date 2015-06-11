@@ -91,7 +91,7 @@ def calcMatrixStepByStep(seqVertical, seqHorizontal, blosum, penalty, step):
             else:
                 break
     
-    return F, steps
+    return steps
     
 def traceback(seq, seqRef, scoreMatrix, startPos, blosum,penalty):
     '''Find the optimal path through the matrix representing the alignment.
@@ -200,11 +200,11 @@ def needlemanWunsch(step=-1, seq="GATTA", seqRef="GAATTC", penalty=-5):
     matrix=[]
                                  
     if step>=0 and step<len(seq)*len(seqRef)-1:
-        matrix, steps=calcMatrixStepByStep(seq, seqRef, blosum, penalty, step)
-        return [row[1:] for row in matrix[1:]], steps, "", ""
+        steps=calcMatrixStepByStep(seq, seqRef, blosum, penalty, step)
+        return steps
         
     matrix =calcMatrix(seq, seqRef, blosum, penalty)
     rightBottomCell=(len(seq), len(seqRef))
     seqAligned, seqRefAligned = traceback(seq, seqRef, matrix, rightBottomCell, blosum, penalty)
-    return [row[1:] for row in matrix[1:]], [], seqAligned, seqRefAligned
+    return [row[1:] for row in matrix[1:]], seqAligned, seqRefAligned
 
