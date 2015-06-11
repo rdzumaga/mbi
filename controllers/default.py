@@ -15,25 +15,27 @@ def algorithm():
     d = ""
 
     form=FORM(DIV(LABEL('Sekwencja A:', _for="seqA", _class='col-sm-2 control-label'), DIV(INPUT(_id='seqA', _name='seqA', _type='text', _style='text-transform: uppercase', requires = IS_ALPHANUMERIC(error_message='Musisz podać AGCT'), _class='form-control', _placeholder = 'np. AAGCT'), _class='col-md-4'), _class='form-group', _id='seqADiv'),
-              
+
               DIV(LABEL('Sekwencja B:', _for="seqB", _class='col-sm-2 control-label'), DIV(INPUT(_id='seqB', _name='seqB', _type='text', _style='text-transform: uppercase', requires = [IS_ALPHANUMERIC(error_message='Musisz podać AGCT')], _class='form-control', _placeholder = 'np. AAGCT'), _class='col-md-4'), _class='form-group',  _id='seqBDiv'),
-              
+
               DIV(LABEL('Kara za przerwę:', _for="break_penalty", _class='col-sm-2 control-label'), DIV(INPUT(_id='break_penalty', _name='break_penalty', requires=IS_INT_IN_RANGE(-10, 11,error_message='Musisz podać liczbę'), _class='form-control', _placeholder = 'np. -2'), _class='col-md-4'), _class='form-group', _id='seqCDiv'),
-              
+
               DIV(DIV(DIV(LABEL(INPUT(_name='step',value=False,_type='checkbox'), 'Praca krokowa'), _class='checkbox'),_class='col-sm-offset-2 col-sm-4'), _class = 'form-group' ),
-              
-              INPUT(_id='iters', _name='iters', value='0', _type='hidden')
-              
+
+              INPUT(_id='iters', _name='iters', value='-1', _type='hidden')
+
               #DIV(DIV(INPUT(_type='submit', _class='btn btn-primary btn-lg', _value='Wykonaj'),_class='col-sm-offset-2 col-sm-4'),_class='form-group')
               )
-    
+
     form['_class']='form-horizontal'
     form['_id']='myForm'
 
 
     if form.accepts(request.vars, session, keepvalues=True):
-        x = int(request.vars.break_penalty)
-        d=NW.needlemanWunsch(request.vars.seqA,request.vars.seqB, x, 0)
+        x=int(request.vars.break_penalty)
+        iterx=int(request.vars.iters)
+        d=NW.needlemanWunsch(iterx, request.vars.seqA,request.vars.seqB, x)
+
 
 
 
