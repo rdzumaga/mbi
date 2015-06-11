@@ -1,0 +1,9 @@
+/* algorithm css*/
+table.similarityMatrix {
+    text-align:center;
+    width:200px;
+}
+
+table.similarityMatrix th{
+    background-color:#80C4FF;
+}
