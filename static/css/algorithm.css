@@ -7,3 +7,12 @@ table.similarityMatrix {
 table.similarityMatrix th{
     background-color:#337ab7;
 }
+
+table.algorithmMatrix {
+    height:400px;
+    width:400px;
+}
+
+table.algorithmMatrix th{
+    background-color:#5cb85c;
+}
