@@ -66,7 +66,9 @@
 
         </div>
 		{{wynik=d}}
-        {{if len(wynik) == 3 and request.vars.iterator == -1:}}
+
+		
+        {{if len(wynik) == 3 and request.vars.iters == '-1':}}
 		<div class="col-md-5">
             <h3>
                 Wynik dopasowania:
@@ -108,7 +110,7 @@
 			
 
         </div>
-		{{elif len(wynik) > 0 and request.vars.iterator != -1:}}
+		{{elif len(wynik) > 0 and request.vars.iters != '-1':}}
 		<div class="col-md-5">
 			
 			
