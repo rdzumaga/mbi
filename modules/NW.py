@@ -63,6 +63,7 @@ def calcMatrixStepByStep(seqVertical, seqHorizontal, blosum, penalty, step):
     for i in range(1, rows):
         for j in range(1, cols):
             counter+=1
+            
             #check if reached the indicated step nr
             if counter<=step:
                 #match or delete or insert =(value, row, col)
@@ -200,22 +201,14 @@ def needlemanWunsch(step=0, seq="GATTA", seqRef="GAATTC", penalty=-5):
                                  
     if step>0 and step<len(seq)*len(seqRef)-1:
         matrix, steps=calcMatrixStepByStep(seq, seqRef, blosum, penalty, step)
-        print_matrix(matrix)
-        print
-        print steps
         return steps
         
     matrix =calcMatrix(seq, seqRef, blosum, penalty)
-    #print_matrix(matrix)
-    #print matrix
     rightBottomCell=(len(seq), len(seqRef))
     seqAligned, seqRefAligned = traceback(seq, seqRef, matrix, rightBottomCell, blosum, penalty)
-    print
-    print seqAligned
-    print seqRefAligned
     return matrix, seqAligned, seqRefAligned
     
 
-needlemanWunsch()
+
 
 
