@@ -24,9 +24,10 @@ def algorithm():
               
               INPUT(_id='iters', _name='iters', value='0', _type='hidden'),
               
-              DIV(DIV(INPUT(_type='submit', _class='btn btn-primary btn-lg', _value='Wykonaj'),_class='col-sm-offset-2 col-sm-4'),_class='form-group'))
+              # DIV(DIV(INPUT(_type='submit', _class='btn btn-primary btn-lg', _value='Wykonaj'),_class='col-sm-offset-2 col-sm-4'),_class='form-group'))
     
     form['_class']='form-horizontal'
+	form['_id']='myForm'
 
     if form.accepts(request.vars, session, keepvalues=True):
         x = int(request.vars.break_penalty)
