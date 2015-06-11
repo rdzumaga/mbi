@@ -1,6 +1,17 @@
 {{extend 'layout.html'}}
-<h1>Algorytm Needlemana-WENSZA &#x1F40D;</h1>
+
+
+<div class="container-fluid">
+
+     <h1>Algorytm Needlemana-WENSZA &#x1F40D;</h1>
 <br />
+    
+    <div class="row">
+        
+        <div class="col-md-5">
+            
+                
+
 
 {{=form}}
 
@@ -27,8 +38,8 @@ Kara za przerwę:
 <input type="submit" />
 </form>-->
 </br>
-    <label class="col-sm-1 control-label">Macierz podobieństwa:</label>
-</br>
+    <label class="col-sm-2 control-label">Macierz podobieństwa:</label>
+        </br></br>
 <table class="similarityMatrix table table-bordered table-condensed table-hover table-striped" >
     <thead style="text-align:center;">
         <tr>
@@ -72,4 +83,19 @@ Kara za przerwę:
 </table>
 
 <h2>Wprowadzone dane:</h2>
-{{=BEAUTIFY(request.vars)}}
+{{=BEAUTIFY(request.vars)}}   
+    
+            
+            
+        </div>
+
+        <div class="col-md-5">
+                <p>
+                    test
+            </p>
+        </div>
+        
+        
+    </div>
+    
+</div>
