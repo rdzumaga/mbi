@@ -20,3 +20,8 @@ table.algorithmMatrix th{
 nonValidate {
     border-color:red;
 }
+
+.outputTable{
+	table-layout:fixed;
+	width:400px;
+}

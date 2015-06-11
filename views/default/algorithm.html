@@ -17,26 +17,6 @@
 
 
 
-{{=d}}
-
-<!--
-{{=BEAUTIFY(response._vars)}}
-
-<h2>Podaj parametry</h2>
-<form enctype="multipart/form-data"
-      action="{{=URL()}}" method="post">
-Sekwencja A:
-<input name="seqA" />
-{{INPUT(_name='seqA', requires=IS_IN_SET(['a','c','g','t'],error_message='test message'))}}
-Sekwencja B:
-<input name="seqB" />
-
-Kara za przerwę:
-<input name="penaltybreak" />
-
-
-<input type="submit" />
-</form>-->
 </br>
     <label class="col-sm-2 control-label">Macierz podobieństwa:</label>
         </br></br>
@@ -81,22 +61,30 @@ Kara za przerwę:
         </tr>
     </tbody>
 </table>
-<div id=buttonPlace></div>
+<div id="buttonPlace" class="col-md-offset-2"></div>
 
-<h2>Wprowadzone dane:</h2>
-{{=BEAUTIFY(request.vars)}}   
-    
-            
-            
-        </div>
 
-        <div class="col-md-5">
-                <p>
-                    test
-            </p>
         </div>
-        
-        
+		{{wynik=d}}
+        {{if len(wynik) > 0:}}
+		<div class="col-md-5">
+            <h3>
+                Wynik dopasowania:
+            </h3>
+			<table class="outputTable table table-bordered table-condensed table-striped" style="text-align:center;">
+				<tr>
+					{{for letter in wynik[0]:}}<td><div>{{=letter}}</div></td>{{pass}}
+				</tr>
+				<tr>
+					{{for letter in wynik[1]:}}<td><div>{{=letter}}</div></td>{{pass}}
+				</tr>					
+			</table>   
+
+        </div>
+		{{else:}}{{pass}}
+
     </div>
-    
+
 </div>
+
+<br /><br />
