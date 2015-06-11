@@ -139,7 +139,7 @@
 				<tr>
 					<th>{{=letter}}</th>
 					<th>{{=currentpen+int(request.vars.break_penalty)}}{{currentpen=currentpen+int(request.vars.break_penalty)}}</th>
-					{{for letter in request.vars.seqB:}}{{currid = currid + 1}}<td id="{{=currid}}"></td>{{pass}}
+					{{for letter in request.vars.seqB:}}{{currid = currid + 1}}<td id="cell{{=currid}}"></td>{{pass}}
 				</tr>
 				{{pass}}
 				
