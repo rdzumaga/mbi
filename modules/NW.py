@@ -48,7 +48,7 @@ def calcMatrixStepByStep(seqVertical, seqHorizontal, blosum, penalty, step):
     cols = len(seqHorizontal)+1
     #rows=step/len(seqHorizontal)+1
     #cols=step%len(seqHorizontal)
-    print "step=", step, "rows=", rows, "cols=", cols
+    #print "step=", step, "rows=", rows, "cols=", cols
     
     F = createMatrix(rows, cols)
 
