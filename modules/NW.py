@@ -195,20 +195,16 @@ def print_matrix(matrix):
             print('{0:>4}'.format(col)),
         print
 
-def needlemanWunsch(step=0, seq="GATTA", seqRef="GAATTC", penalty=-5):
+def needlemanWunsch(step=-1, seq="GATTA", seqRef="GAATTC", penalty=-5):
     blosum=readBlosum("blosum.txt")
     matrix=[]
                                  
-    if step>0 and step<len(seq)*len(seqRef)-1:
+    if step>=0 and step<len(seq)*len(seqRef)-1:
         matrix, steps=calcMatrixStepByStep(seq, seqRef, blosum, penalty, step)
-        return matrix, steps, "", ""
+        return [row[1:] for row in matrix[1:]], steps, "", ""
         
     matrix =calcMatrix(seq, seqRef, blosum, penalty)
     rightBottomCell=(len(seq), len(seqRef))
     seqAligned, seqRefAligned = traceback(seq, seqRef, matrix, rightBottomCell, blosum, penalty)
-    return matrix, [], seqAligned, seqRefAligned
-    
-
-
-
+    return [row[1:] for row in matrix[1:]], [], seqAligned, seqRefAligned
 
