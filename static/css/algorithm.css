@@ -23,7 +23,27 @@ nonValidate {
     border-color:red;
 }
 
-.outputTable{
+.similarityMatrix{
 	table-layout:fixed;
-	width:400px;
+	/*width:400px;*/
+}
+
+.similarityMatrix .down {
+  top: -10px;
+  left: 6px;
+}
+
+.similarityMatrix .down-right {
+  -webkit-transform: rotate(45deg);
+  left: -24px;
+  top: -10px;
+}
+
+.similarityMatrix .right {
+  left: -24px;
+  top: 50%;
+  margin-top: -7px;
+
+.similarityMatrix .glyphicon {
+  position: relative;
 }
