@@ -66,21 +66,54 @@
 
         </div>
 		{{wynik=d}}
-        {{if len(wynik) > 0:}}
+        {{if len(wynik) == 3:}}
 		<div class="col-md-5">
             <h3>
                 Wynik dopasowania:
             </h3>
 			<table class="outputTable table table-bordered table-condensed table-striped" style="text-align:center;">
 				<tr>
-					{{for letter in wynik[0]:}}<td><div>{{=letter}}</div></td>{{pass}}
+					{{for letter in wynik[1]:}}<td><div>{{=letter}}</div></td>{{pass}}
 				</tr>
 				<tr>
-					{{for letter in wynik[1]:}}<td><div>{{=letter}}</div></td>{{pass}}
+					{{for letter in wynik[2]:}}<td><div>{{=letter}}</div></td>{{pass}}
 				</tr>					
-			</table>   
+			</table>
+			
+			<!--TABELA Z WYIKIEM DUZA!-->
+			
+			<table class="table table-bordered">
+				{{currentpen = (-int(request.vars.break_penalty))}}
+				<tr>
+					<th></th>
+					<th></th>
+					{{for letter in request.vars.seqB:}}<th>{{=letter}}</th>{{pass}}
+				</tr>
+				<tr>
+					<th></th>
+					{{for letter in ((request.vars.seqB+'x')):}}<th>{{=currentpen+int(request.vars.break_penalty)}}{{currentpen=currentpen+int(request.vars.break_penalty)}}</th>{{pass}}
+				</tr>
+				{{currentpen = 0}}{{iterator=-1}}
+				{{for letter in request.vars.seqA:}}
+				{{iterator = iterator + 1}}
+				<tr>
+					<th>{{=letter}}</th>
+					<th>{{=currentpen+int(request.vars.break_penalty)}}{{currentpen=currentpen+int(request.vars.break_penalty)}}</th>
+					{{for value in wynik[0][iterator]:}}<td>{{=value}}</td>{{pass}}
+				</tr>
+				{{pass}}
+				
+			</table>
+			
+			
 
         </div>
+		{{elif len(wynik) == 1:}}
+		<div class="col-md-5">
+			
+			
+			
+		</div>
 		{{else:}}{{pass}}
 
     </div>
