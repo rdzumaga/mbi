@@ -25,15 +25,15 @@ response.google_analytics_id = None
 #########################################################################
 
 response.menu = [
-    (T('Needleman–Wunsch algorithm'), False, URL('default', 'algorithm'), [])
+    (T("Algorytm Needlemana–Wunscha"), False, URL('default', 'algorithm'), [])
 ]
 
 response.menu += [
-    (T('Smith–Waterman algorithm'), False, URL('default', 'algorithm'), [])
+    (T("Algorytm Smitha–Watermana"), False, URL('default', 'algorithm'), [])
 ]
 
 response.menu += [
-    (T('FASTA algorithm'), False, URL('default', 'algorithm'), [])
+    (T('Algorytm FASTA'), False, URL('default', 'algorithm'), [])
 ]
 
 DEVELOPMENT_MENU = False
