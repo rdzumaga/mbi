@@ -6,14 +6,14 @@
 #########################################################################
 
 response.logo = A(B('web',SPAN(2),'py'),XML('&trade;&nbsp;'),
-                  _class="navbar-brand",_href="http://www.web2py.com/",
+                  _class="navbar-brand",_href="",
                   _id="web2py-logo")
 response.title = request.application.replace('_',' ').title()
 response.subtitle = ''
 
 ## read more at http://dev.w3.org/html5/markup/meta.name.html
-response.meta.author = 'Your Name <you@example.com>'
-response.meta.description = 'a cool new app'
+response.meta.author = 'Rafał Dżumaga, Ewelina Grudzień, Katarzyna Stepek'
+response.meta.description = 'MBI Project'
 response.meta.keywords = 'web2py, python, framework'
 response.meta.generator = 'Web2py Web Framework'
 
@@ -25,10 +25,18 @@ response.google_analytics_id = None
 #########################################################################
 
 response.menu = [
-    (T('Home'), False, URL('default', 'index'), [])
+    (T('Needleman–Wunsch algorithm'), False, URL('default', 'algorithm'), [])
 ]
 
-DEVELOPMENT_MENU = True
+response.menu += [
+    (T('Smith–Waterman algorithm'), False, URL('default', 'algorithm'), [])
+]
+
+response.menu += [
+    (T('FASTA algorithm'), False, URL('default', 'algorithm'), [])
+]
+
+DEVELOPMENT_MENU = False
 
 #########################################################################
 ## provide shortcuts for development. remove in production
@@ -135,4 +143,4 @@ def _():
         ]
 if DEVELOPMENT_MENU: _()
 
-if "auth" in locals(): auth.wikimenu() 
+if "auth" in locals(): auth.wikimenu()
