@@ -122,7 +122,7 @@ function addValueToMatrix(){
         var val = document.getElementById(id).value;
         var arrayVal = getArray(val);
         var cellId = "cell" + i;
-         document.getElementById(cellId).innerHTML = arrayVal[3] + "<br/>" + arrayVal[4] +  "<br/>" + arrayVal[5] ;
+         document.getElementById(cellId).innerHTML = checkIfStrong(arrayVal, 3) + "<br/>" + checkIfStrong(arrayVal, 4) +  "<br/>" + checkIfStrong(arrayVal, 5);
     }
 }
 
@@ -130,4 +130,12 @@ function getArray(val){
     var str = val.substring(1, val.length-1);
     var array = str.split(", ");
     return array;
+}
+
+function checkIfStrong(array, nr)
+{
+    if (array[nr] == array[0]){
+        return "<strong>"+array[nr]+"</strong>";
+    }
+    else return array[nr].toString();
 }
