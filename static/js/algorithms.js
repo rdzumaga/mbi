@@ -4,6 +4,11 @@ function addButton() {
     btn.appendChild(t);
     document.getElementById("buttonPlace").appendChild(btn);
     btn.className = "btn btn-primary btn-lg";
+    
+    if (document.getElementById("values1")){
+        addValueToMatrix();
+    }
+    
     btn.onclick = function () {
          document.getElementById("seqA").value = document.getElementById("seqA").value.toUpperCase();
          document.getElementById("seqB").value = document.getElementById("seqB").value.toUpperCase();
@@ -108,4 +113,14 @@ function checkStepMode() {
         }
     }
     else document.getElementById("iters").value=-1;
+}
+
+function addValueToMatrix(){
+    var iters = document.getElementById("iters").value;
+    for(i=1; i<=iters; i++){
+        var id = "values" + i;
+        var val = document.getElementById(id).value;
+        var cellId = "cell" + i;
+        document.getElementById(cellId).innerText = val;
+    }
 }

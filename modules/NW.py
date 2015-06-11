@@ -1,4 +1,3 @@
-
 #seqRef="GAATTC"
 #seq="GATTA"
 #penalty=-5
@@ -198,7 +197,7 @@ def needlemanWunsch(step=-1, seq="GATTA", seqRef="GAATTC", penalty=-5):
     blosum=readBlosum("blosum.txt")
     matrix=[]
                                  
-    if step>=0 and step<len(seq)*len(seqRef)-1:
+    if step>=0 and step<len(seq)*len(seqRef)+1:
         steps=calcMatrixStepByStep(seq, seqRef, blosum, penalty, step)
         return steps
         
@@ -206,4 +205,3 @@ def needlemanWunsch(step=-1, seq="GATTA", seqRef="GAATTC", penalty=-5):
     rightBottomCell=(len(seq), len(seqRef))
     seqAligned, seqRefAligned = traceback(seq, seqRef, matrix, rightBottomCell, blosum, penalty)
     return [row[1:] for row in matrix[1:]], seqAligned, seqRefAligned
-
