@@ -89,9 +89,76 @@ def calcScore(seq, seqRef, matrix, i, j, penalty, match, mismatch):
 
     return max(0, diagScore, upScore, leftScore)
 
-def calcMatrixStepByStep():
+
+def calcStep(steps, seq, seqRef, matrix, i, j, penalty, match, mismatch):
+    '''Calculate score for a given position in the scoring matrix.
+
+    The score is based on the up, left, and upper-left neighbors.
+    '''
+    #print "steps: ", steps
+    nextStep=[]
+    possibilities=[]
+    bestIndex=0
+    similarity=match if seq[i-1]==seqRef[j-1] else mismatch
+  
+    diag = [matrix[i - 1][j - 1] + similarity, i-1, j-1]
+    possibilities.append(diag)
 	
-	return [5]
+    up = [matrix[i - 1][j] + penalty, i-1, j]
+    possibilities.append(up)
+    if(up[0]>diag[0]):
+	bestIndex=1
+		
+    left = [matrix[i][j - 1] + penalty, i, j-1]
+    possibilities.append(left)
+	
+    zero =[0, -1, -1]
+    possibilities.append(zero)
+	
+    if left[0]>up[0] and left[0]>diag[0]:
+        bestIndex=2
+		
+    if possibilities[bestIndex][0]<0:
+        
+	bestIndex=3
+
+    #print "possi[best]=",bestIndex, " ___________", diag, up, left	
+    best=possibilities[bestIndex]
+    steps.append([best[0], best[1], best[2],  possibilities[0][0], possibilities[1][0], possibilities[2][0]])
+
+    return steps, possibilities[bestIndex][0]
+
+def calcMatrixStepByStep(step, seq, seqRef, penalty, match, mismatch):
+    rows=len(seq)+1
+    cols=len(seqRef)+1
+    
+    #initialize the matrix with 0
+    scoreMatrix = [[0 for col in range(cols)] for row in range(rows)]
+    steps=[]
+	
+    maxScore = 0
+    bestPos   = None    # i and j index for matrix cell with highest score
+    
+    counter=0
+    # Fill the scoring matrix.
+    for i in range(1, rows):
+        for j in range(1, cols):
+	    counter+=1
+			
+	    #check if reached the indicated step nr
+            if counter<=step:
+                steps, score = calcStep(steps,seq, seqRef, scoreMatrix, i, j, penalty, match, mismatch)
+                if score > maxScore:
+                    maxScore = score
+                    bestPos   = (i, j)
+            else:
+                break
+            
+	    scoreMatrix[i][j] = score
+	    
+
+    assert bestPos is not None, 'position with the highest score not found'
+    return scoreMatrix, steps
 	
 	
 def traceback(scoreMatrix, startPos, seq, seqRef, penalty, match, mismatch):
@@ -134,6 +201,9 @@ def traceback(scoreMatrix, startPos, seq, seqRef, penalty, match, mismatch):
 
 
 def nextStep(scoreMatrix, i, j, seq, seqRef, penalty, match, mismatch):
+    if(i==0 or j==0):
+        return 0
+
     score=scoreMatrix[i][j]
     diag = scoreMatrix[i - 1][j - 1]
     up   = scoreMatrix[i - 1][j]
@@ -262,34 +332,24 @@ def SmithWaterman(step=0, seq="GACTTAC", seqRef="CGTGAATTCAT", penalty=-4, match
     rows=len(seq)+1
     cols=len(seqRef)+1
     matrix=[]
-	
-    if step>0 and step<len(seqRef)-1:
-        matrix, steps=calcMatrixStepByStep()
+    
+    if step>0 and step<len(seq)*len(seqRef)-1:
+        matrix, steps=calcMatrixStepByStep(step, seq, seqRef, penalty, match, mismatch)
+        printMatrix(matrix, seq, seqRef)
         return steps
 	
     scoreMatrix, bestPos = createScoreMatrix(seq, seqRef, penalty, match, mismatch)
-
-    print_matrix(scoreMatrix)
-    print
-    printMatrix(scoreMatrix, seq, seqRef)
-    print
     
     # Traceback. Find the optimal path through the scoring matrix. This path
     # corresponds to the optimal local sequence alignment.
     seqAligned, seqRefAligned = traceback(scoreMatrix, bestPos, seq, seqRef, penalty, match, mismatch)
     assert len(seqAligned) == len(seqRefAligned), 'aligned strings are not the same size'
+    return [row[1:] for row in matrix[1:]], seqAligned, seqRefAligned
 
-    print "***************stats**************"
-    print "seq=", seq, "rows=", len(seq), "seq is vertical and string in"
-    print "seqRef=", seqRef,"cols=len(seqRef), seqRef is horizontal and string ref"
-    print "seqAligned=   ",seqAligned
-    print "seqRefAligned=",seqRefAligned
-    print "*********************************"
 
-	
-      
 
-SmithWaterman()	  
+
+
 """"
 #------------------------------------
 try:
