@@ -5,6 +5,8 @@ function addButton() {
     document.getElementById("buttonPlace").appendChild(btn);
     btn.className = "btn btn-primary btn-lg";
     btn.onclick = function () {
+         document.getElementById("seqA").value = document.getElementById("seqA").value.toUpperCase();
+         document.getElementById("seqB").value = document.getElementById("seqB").value.toUpperCase();
         if (sequenceValidation()) {
             document.getElementById("myForm").submit();
         }
@@ -15,14 +17,14 @@ function sequenceValidation() {
     var seqA = document.getElementById("seqA");
     var seqB = document.getElementById("seqB");
     var ok = true;
-    if (seqA.value=="" || !(/^[ACTG]*$/.test(seqA.value.toUpperCase()))) {
+    if (seqA.value=="" || !(/^[ACTG]*$/.test(seqA.value))) {
         addWarning('A');
         ok = false;
     }
     else {
         removeWarning('A');
     }
-    if (seqB.value=="" || !(/^[ACTG]*$/.test(seqB.value.toUpperCase()))) {
+    if (seqB.value=="" || !(/^[ACTG]*$/.test(seqB.value))) {
         addWarning('B');
         ok = false;
     }
