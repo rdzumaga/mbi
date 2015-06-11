@@ -4,10 +4,10 @@
 #penalty=-5
 
 # Create an empty matrix
-def createMatrix(m, n):
-    return [[0]*n for _ in xrange(m)]
+def createMatrix(rows, cols):
+    return [[0]*cols for _ in xrange(rows)]
 
-# Read the BLOSUM50 table
+# Read BLOSUM table
 def readBlosum(fname):
 
     #dictionary holding pairs of nucleotides and their BLOSUM matrix value, e.g.: ('T', 'A'): -4
@@ -43,7 +43,55 @@ def calcMatrix(seqVertical, seqHorizontal, blosum, penalty):
  
     return F
 
+def calcMatrixStepByStep(seqVertical, seqHorizontal, blosum, penalty, step):
+    rows = len(seqVertical)+1 
+    cols = len(seqHorizontal)+1
+    #rows=step/len(seqHorizontal)+1
+    #cols=step%len(seqHorizontal)
+    print "step=", step, "rows=", rows, "cols=", cols
+    
+    F = createMatrix(rows, cols)
 
+    steps=[]
+	
+    for i in range(0, rows):
+        F[i][0] = i * penalty
+    for j in range(0, cols):
+        F[0][j] = j * penalty
+    
+    counter=0
+    for i in range(1, rows):
+        for j in range(1, cols):
+            counter+=1
+            #check if reached the indicated step nr
+            if counter<=step:
+                #match or delete or insert =(value, row, col)
+                possibilities=[]
+                indexOfBest=0
+                #match (diag)
+                diag=[F[i-1][j-1] + blosum[(seqVertical[i-1], seqHorizontal[j-1])],i-1, j-1]
+                possibilities.append(diag)
+               
+                #delete (up)
+                up=[F[i-1][j] + penalty, i-j, j]
+                possibilities.append(up)
+                if up[0]>diag[0]:
+                    indexOfBest=1
+
+                #insert (left)
+                left=[F[i][j-1] + penalty, i, j-1]
+                possibilities.append(left)
+                if left[0]>up[0] and left[0]>diag[0]:
+                    indexOfBest=2
+
+                best=possibilities[indexOfBest]
+                steps.append([best[0], best[1], best[2],  possibilities[0][0], possibilities[1][0], possibilities[2][0]])
+                F[i][j] = best[0]
+            else:
+                break
+    
+    return F, steps
+    
 def traceback(seq, seqRef, scoreMatrix, startPos, blosum,penalty):
     '''Find the optimal path through the matrix representing the alignment.
 
@@ -146,20 +194,28 @@ def print_matrix(matrix):
             print('{0:>4}'.format(col)),
         print
 
-def needlemanWunsch(seq="GATTA", seqRef="GAATTC", penalty=-5, i=0):
+def needlemanWunsch(step=0, seq="GATTA", seqRef="GAATTC", penalty=-5):
     blosum=readBlosum("blosum.txt")
-    #print blosum
-    matrix=calcMatrix(seq, seqRef, blosum, penalty)
-    ##print_matrix(matrix)
+    matrix=[]
+                                 
+    if step>0 and step<len(seq)*len(seqRef)-1:
+        matrix, steps=calcMatrixStepByStep(seq, seqRef, blosum, penalty, step)
+        print_matrix(matrix)
+        print
+        print steps
+        return steps
+        
+    matrix =calcMatrix(seq, seqRef, blosum, penalty)
+    #print_matrix(matrix)
+    #print matrix
     rightBottomCell=(len(seq), len(seqRef))
     seqAligned, seqRefAligned = traceback(seq, seqRef, matrix, rightBottomCell, blosum, penalty)
-    #print
-    #print seqAligned
-    #print seqRefAligned
-    if i>0:
-        return matrix
-    else:
-        return seqAligned, seqRefAligned
+    print
+    print seqAligned
+    print seqRefAligned
+    return matrix, seqAligned, seqRefAligned
     
-    
+
+needlemanWunsch()
+
 
