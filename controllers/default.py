@@ -22,6 +22,8 @@ def algorithm():
               
               DIV(LABEL(B('Praca krokowa:'), XML("&nbsp;"), INPUT(_name='step',value=False,_type='checkbox',_class='checkbox')), _class = 'checkbox form-group' ),XML("&nbsp;"),
               
+              INPUT(_id='iters', _name='iters', value='0', _type='hidden'),
+              
               INPUT(_type='submit', _class='btn btn-success', _value='Start'))
     
     form['_class']='form-inline'
