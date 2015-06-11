@@ -87,10 +87,10 @@ function removeWarning(seq) {
     if (seq == 'A' && errorA) {
         errorA.innerHTML= "";
     }
-    else if(seq == 'A' && errorB) {
+    else if(seq == 'B' && errorB) {
         errorB.innerHTML= "";
     }
-    else {
+    else if (errorC){
         errorC.innerHTML="";
     }
 }
