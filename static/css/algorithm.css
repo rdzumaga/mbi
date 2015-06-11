@@ -6,7 +6,6 @@ table.similarityMatrix {
 
 table.similarityMatrix th{
     background-color:#337ab7;
-    text-align:center;
 }
 
 table.algorithmMatrix {
@@ -16,4 +15,8 @@ table.algorithmMatrix {
 
 table.algorithmMatrix th{
     background-color:#5cb85c;
+}
+
+nonValidate {
+    border-color:red;
 }
