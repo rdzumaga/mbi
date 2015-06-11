@@ -14,6 +14,7 @@ def algorithm():
 
     d = ""
 
+
     form=FORM(DIV(LABEL('Sekwencja A:', _for="seqA", _class='col-sm-2 control-label'), DIV(INPUT(_id='seqA', _name='seqA', _type='text', _style='text-transform: uppercase', requires = IS_ALPHANUMERIC(error_message='Musisz podać AGCT'), _class='form-control', _placeholder = 'np. AAGCT'), _class='col-md-4'), _class='form-group', _id='seqADiv'),
 
               DIV(LABEL('Sekwencja B:', _for="seqB", _class='col-sm-2 control-label'), DIV(INPUT(_id='seqB', _name='seqB', _type='text', _style='text-transform: uppercase', requires = [IS_ALPHANUMERIC(error_message='Musisz podać AGCT')], _class='form-control', _placeholder = 'np. AAGCT'), _class='col-md-4'), _class='form-group',  _id='seqBDiv'),
@@ -35,9 +36,6 @@ def algorithm():
         x=int(request.vars.break_penalty)
         iterx=int(request.vars.iters)
         d=NW.needlemanWunsch(iterx, request.vars.seqA,request.vars.seqB, x)
-
-
-
 
 
     return dict(form=form, d=d)
