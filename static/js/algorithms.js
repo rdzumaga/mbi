@@ -8,6 +8,7 @@ function addButton() {
          document.getElementById("seqA").value = document.getElementById("seqA").value.toUpperCase();
          document.getElementById("seqB").value = document.getElementById("seqB").value.toUpperCase();
         if (sequenceValidation()) {
+            checkStepMode();
             document.getElementById("myForm").submit();
         }
     };
@@ -93,4 +94,12 @@ function removeWarning(seq) {
     else if (errorC){
         errorC.innerHTML="";
     }
+}
+
+function checkStepMode() {
+    if(document.getElementById("checkBox").checked)
+    {
+        document.getElementById("iters").value=0;
+    }
+    else document.getElementById("iters").value=-1;
 }

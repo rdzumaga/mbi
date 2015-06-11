@@ -20,7 +20,7 @@ def algorithm():
 
               DIV(LABEL('Kara za przerwę:', _for="break_penalty", _class='col-sm-2 control-label'), DIV(INPUT(_id='break_penalty', _name='break_penalty', requires=IS_INT_IN_RANGE(-10, 11,error_message='Musisz podać liczbę'), _class='form-control', _placeholder = 'np. -2'), _class='col-md-4'), _class='form-group', _id='seqCDiv'),
 
-              DIV(DIV(DIV(LABEL(INPUT(_name='step',value=False,_type='checkbox'), 'Praca krokowa'), _class='checkbox'),_class='col-sm-offset-2 col-sm-4'), _class = 'form-group' ),
+              DIV(DIV(DIV(LABEL(INPUT(_name='step', _id='checkBox' ,value=False,_type='checkbox'), 'Praca krokowa'), _class='checkbox'),_class='col-sm-offset-2 col-sm-4'), _class = 'form-group' ),
 
               INPUT(_id='iters', _name='iters', value='-1', _type='hidden')
 
