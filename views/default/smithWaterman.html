@@ -84,23 +84,23 @@
 			
 			<!--TABELA Z WYIKIEM DUZA!-->
 			
-			<table class="table table-bordered">
-				{{currentpen = (-int(request.vars.break_penalty))}}
+			<table class="outputTable greenTable table table-bordered table-striped">
+				
 				<tr>
-					<th></th>
-					<th></th>
+					<th><span class="glyphicon glyphicon-resize-full"></span></th>
+					<th><span class="glyphicon glyphicon-arrow-right"></span></th>
 					{{for letter in request.vars.seqB:}}<th>{{=letter}}</th>{{pass}}
 				</tr>
 				<tr>
-					<th></th>
-					{{for letter in ((request.vars.seqB+'x')):}}<th>{{=currentpen+int(request.vars.break_penalty)}}{{currentpen=currentpen+int(request.vars.break_penalty)}}</th>{{pass}}
+					<th><span class="glyphicon glyphicon-arrow-down"></span></th>
+					{{for letter in ((request.vars.seqB+'x')):}}<th>0</th>{{pass}}
 				</tr>
-				{{currentpen = 0}}{{iterator=-1}}
+				{{iterator=-1}}
 				{{for letter in request.vars.seqA:}}
 				{{iterator = iterator + 1}}
 				<tr>
 					<th>{{=letter}}</th>
-					<th>{{=currentpen+int(request.vars.break_penalty)}}{{currentpen=currentpen+int(request.vars.break_penalty)}}</th>
+					<th>0</th>
 					{{for value in wynik[0][iterator]:}}<td>{{=value}}</td>{{pass}}
 				</tr>
 				{{pass}}
@@ -113,7 +113,9 @@
 		{{elif len(wynik) > 0 and request.vars.iters != '-1':}}
 		<div class="col-md-5">
 			
-			
+			<h3>
+				Krok {{=request.vars.iters}}:				
+			</h3>
 			
 			{{i=1}}			
 			{{for val in wynik:}}
@@ -122,23 +124,23 @@
 			{{i=i+1}}			
 			{{pass}}
 			
-			<table class="table table-bordered">
-				{{currentpen = (-int(request.vars.break_penalty))}}
+			<table id="stepTable" class="outputTable greenTable table table-bordered">
+				
 				<tr>
-					<th></th>
-					<th></th>
+					<th><span class="glyphicon glyphicon-resize-full"></span></th>
+					<th><span class="glyphicon glyphicon-arrow-right"></span></th>
 					{{for letter in request.vars.seqB:}}<th>{{=letter}}</th>{{pass}}
 				</tr>
 				<tr>
-					<th></th>
-					{{for letter in ((request.vars.seqB+'x')):}}<th>{{=currentpen+int(request.vars.break_penalty)}}{{currentpen=currentpen+int(request.vars.break_penalty)}}</th>{{pass}}
+					<th><span class="glyphicon glyphicon-arrow-down"></span></th>
+					{{for letter in ((request.vars.seqB+'x')):}}<th>0</th>{{pass}}
 				</tr>
-				{{currentpen = 0}}{{currid=0}}
+				{{currid=0}}
 				{{for letter in request.vars.seqA:}}
 				
 				<tr>
 					<th>{{=letter}}</th>
-					<th>{{=currentpen+int(request.vars.break_penalty)}}{{currentpen=currentpen+int(request.vars.break_penalty)}}</th>
+					<th>0</th>
 					{{for letter in request.vars.seqB:}}{{currid = currid + 1}}<td id="cell{{=currid}}"></td>{{pass}}
 				</tr>
 				{{pass}}

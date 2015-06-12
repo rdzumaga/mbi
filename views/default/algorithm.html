@@ -84,15 +84,15 @@
 			
 			<!--TABELA Z WYIKIEM DUZA!-->
 			
-			<table class="table table-bordered">
+			<table class="outputTable greenTable table table-bordered table-striped" style="text-align:center;">
 				{{currentpen = (-int(request.vars.break_penalty))}}
 				<tr>
-					<th></th>
-					<th></th>
+					<th><span class="glyphicon glyphicon-resize-full"></span></th>
+					<th><span class="glyphicon glyphicon-arrow-right"></span></th>
 					{{for letter in request.vars.seqB:}}<th>{{=letter}}</th>{{pass}}
 				</tr>
 				<tr>
-					<th></th>
+					<th><span class="glyphicon glyphicon-arrow-down"></span></th>
 					{{for letter in ((request.vars.seqB+'x')):}}<th>{{=currentpen+int(request.vars.break_penalty)}}{{currentpen=currentpen+int(request.vars.break_penalty)}}</th>{{pass}}
 				</tr>
 				{{currentpen = 0}}{{iterator=-1}}
@@ -113,7 +113,9 @@
 		{{elif len(wynik) > 0 and request.vars.iters != '-1':}}
 		<div class="col-md-5">
 			
-			
+			<h3>
+				Krok {{=request.vars.iters}}:				
+			</h3>
 			
 			{{i=1}}			
 			{{for val in wynik:}}
@@ -122,15 +124,15 @@
 			{{i=i+1}}			
 			{{pass}}
 			
-			<table class="table table-bordered">
+			<table id="stepTable" class="outputTable greenTable table table-bordered table-striped">
 				{{currentpen = (-int(request.vars.break_penalty))}}
 				<tr>
-					<th></th>
-					<th></th>
+					<th><span class="glyphicon glyphicon-resize-full"></span></th>
+					<th><span class="glyphicon glyphicon-arrow-right"></span></th>
 					{{for letter in request.vars.seqB:}}<th>{{=letter}}</th>{{pass}}
 				</tr>
 				<tr>
-					<th></th>
+					<th><span class="glyphicon glyphicon-arrow-down"></span></th>
 					{{for letter in ((request.vars.seqB+'x')):}}<th>{{=currentpen+int(request.vars.break_penalty)}}{{currentpen=currentpen+int(request.vars.break_penalty)}}</th>{{pass}}
 				</tr>
 				{{currentpen = 0}}{{currid=0}}
