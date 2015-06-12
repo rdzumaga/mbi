@@ -134,8 +134,8 @@ function getArray(val){
 
 function checkIfStrong(array, nr)
 {
-    if (array[nr] == array[0]){
+    if (array[0] < 3 && (parseInt(array[0])+3) == nr ){
         return "<strong>"+array[nr]+"</strong>";
     }
-    else return array[nr].toString();
+    else return array[nr];
 }
