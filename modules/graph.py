@@ -58,20 +58,39 @@ def shortest_path_bottomup(graph, s):
                                 result.parent[w] = vars
         return result
 		
-def findPath(graph, start, end, path=[]):
+def findShortestPath(graph, start, end, path=[], value=0):
 	path=path+ [start]
+	value+=start.value
 	if(start==end):
-		return path
+		#print "START=END"
+		return path, value
+		
 	if(start in graph):
+		bestPath=None
+		bestValue=-float('inf')
+		best=None
 		for node in graph[start]:
 			if node not in path:
-				newPath=findPath(graph, node, end, path)
+				#print "Looking for", start ,"->", end,
+				#for p in path:
+					#print p.name,
+				#print value
+				#value+=node[1]
+				newPath, newValue=findShortestPath(graph, node[0], end, path, value)
+				newValue+=node[1]
 				if newPath:
-					return newPath
-	
-	return []
-	
+					if not bestPath or bestValue<newValue:
+						best=newPath
+						bestValue=newValue
+				
+		#print "DOWN_RETURN"
+		return best, bestValue
+	return None, 0
 
+def calcPathValue(path):
+	val=0
+	for node in path:
+		val+=node.value
 def findAllPaths(graph, start, end, path=[]):
 	#print "Finding path for start=", start, " end=", end
 	path=path+ [start]
@@ -291,3 +310,23 @@ for path in paths2:
 	for node in path:	
 		print node,
 	print
+
+path=[]
+value=0	
+when=1
+for startNode in graph:
+	print "ooooooooooooooooooooooooooooooooooooooooo"
+	for node in graph[startNode]:
+		print"\t____________________"
+		path, value=findShortestPath(graph, startNode, node[0])
+		print value,
+		if path:
+			for n in path:	
+				print n,
+		print
+		
+	print
+	if (when>100):
+		break
+	when+=1
+		
