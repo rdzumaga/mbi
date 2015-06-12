@@ -122,7 +122,7 @@ function addValueToMatrix(){
         var val = document.getElementById(id).value;
         var arrayVal = getArray(val);
         var cellId = "cell" + i;
-         document.getElementById(cellId).innerHTML = checkIfStrong(arrayVal, 3) + "<br/>" + checkIfStrong(arrayVal, 4) +  "<br/>" + checkIfStrong(arrayVal, 5);
+         document.getElementById(cellId).innerHTML = addArrow(arrayVal[0]) + checkIfStrong(arrayVal, 3) + "<br/>" + checkIfStrong(arrayVal, 4) +  "<br/>" + checkIfStrong(arrayVal, 5);
     }
 }
 
@@ -138,4 +138,21 @@ function checkIfStrong(array, nr)
         return "<strong>"+array[nr]+"</strong>";
     }
     else return array[nr];
+}
+
+function addArrow (nr){
+    switch (nr) {
+        case "0":
+            return '<i class="glyphicon glyphicon-arrow-right down-right"></i>';
+            break;
+        case "1":
+            return '<i class="glyphicon glyphicon-arrow-down down"></i>';
+            break;
+        case "2":
+            return '<i class="glyphicon glyphicon-arrow-right right"></i>';
+            break;
+        case "3":
+            return '';
+            break;
+    }
 }

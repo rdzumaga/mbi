@@ -161,6 +161,7 @@ function checkStepMode() {
     else document.getElementById("iters").value=-1;
 }
 
+
 function addValueToMatrix(){
     var iters = document.getElementById("iters").value;
     for(i=1; i<=iters; i++){
@@ -168,7 +169,7 @@ function addValueToMatrix(){
         var val = document.getElementById(id).value;
         var arrayVal = getArray(val);
         var cellId = "cell" + i;
-         document.getElementById(cellId).innerHTML = checkIfStrong(arrayVal, 3) + "<br/>" + checkIfStrong(arrayVal, 4) +  "<br/>" + checkIfStrong(arrayVal, 5);
+         document.getElementById(cellId).innerHTML = addArrow(arrayVal[0]) + checkIfStrong(arrayVal, 3) + "<br/>" + checkIfStrong(arrayVal, 4) +  "<br/>" + checkIfStrong(arrayVal, 5);
     }
 }
 
@@ -180,8 +181,25 @@ function getArray(val){
 
 function checkIfStrong(array, nr)
 {
-    if (array[nr] == array[0]){
+    if (array[0] < 3 && (parseInt(array[0])+3) == nr ){
         return "<strong>"+array[nr]+"</strong>";
     }
-    else return array[nr].toString();
+    else return array[nr];
+}
+
+function addArrow (nr){
+    switch (nr) {
+        case "0":
+            return '<i class="glyphicon glyphicon-arrow-right down-right"></i>';
+            break;
+        case "1":
+            return '<i class="glyphicon glyphicon-arrow-down down"></i>';
+            break;
+        case "2":
+            return '<i class="glyphicon glyphicon-arrow-right right"></i>';
+            break;
+        case "3":
+            return '';
+            break;
+    }
 }

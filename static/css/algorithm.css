@@ -32,6 +32,7 @@ table.algorithmMatrix th{
 	vertical-align:middle;
 	text-align:center;
 	height:80px;
+    max-height:80px;
 	width:50px;
 }
 
@@ -58,27 +59,34 @@ table.outputTable.greenTable th,td{
 	height:40px;
 }
 
-.similarityMatrix{
+
+.outputMatrix .cell-container {
+  position: relative;
+  display: block;
+  padding: 6px 10px;
+  min-width: 38px;
+}
+.outputMatrix{
 	table-layout:fixed;
 	/*width:400px;*/
 }
 
-.similarityMatrix .down {
-  top: -10px;
+.outputMatrix .down {
+  top: -16px;
   left: 6px;
 }
 
-.similarityMatrix .down-right {
+.outputMatrix .down-right {
   -webkit-transform: rotate(45deg);
-  left: -24px;
-  top: -10px;
+  left: -16px;
+  top: -16px;
 }
 
-.similarityMatrix .right {
-  left: -24px;
+.outputMatrix .right {
+  left: -36px;
   top: 50%;
-  margin-top: -7px;
+  margin-top: 8px;
 
-.similarityMatrix .glyphicon {
+.outputMatrix .glyphicon {
   position: relative;
 }
