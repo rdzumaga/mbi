@@ -52,9 +52,9 @@ def smithWaterman():
 
             DIV(LABEL('Kara za przerwę:', _for="break_penalty", _class='col-sm-2 control-label'), DIV(INPUT(_id='break_penalty', _name='break_penalty', _class='form-control', _placeholder = 'np. -2'), _class='col-md-4'), _class='form-group', _id='seqCDiv'),
 
-            DIV(LABEL('Zgodność:', _for="match", _class='col-sm-2 control-label'), DIV(INPUT(_id='match', _name='match', _class='form-control', _placeholder = 'np. -2'), _class='col-md-4'), _class='form-group', _id='matchDiv'),
+            DIV(LABEL('Zgodność:', _for="match", _class='col-sm-2 control-label'), DIV(INPUT(_id='match', _name='match', _class='form-control', _placeholder = 'np. -2'), _class='col-md-4'), _class='form-group', _id='seqDDiv'),
 
-            DIV(LABEL('Niezgodność:', _for="mismatch", _class='col-sm-2 control-label'), DIV(INPUT(_id='mismatch', _name='mismatch', _class='form-control', _placeholder = 'np. -2'), _class='col-md-4'), _class='form-group', _id='mismatchDiv'),
+            DIV(LABEL('Niezgodność:', _for="mismatch", _class='col-sm-2 control-label'), DIV(INPUT(_id='mismatch', _name='mismatch', _class='form-control', _placeholder = 'np. -2'), _class='col-md-4'), _class='form-group', _id='seqEDiv'),
 
             DIV(DIV(DIV(LABEL(INPUT(_name='step', _id='checkBox' ,value=False,_type='checkbox'), 'Praca krokowa'), _class='checkbox'),_class='col-sm-offset-2 col-sm-4'), _class = 'form-group' ),
 
