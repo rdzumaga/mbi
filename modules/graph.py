@@ -58,7 +58,37 @@ def shortest_path_bottomup(graph, s):
                                 result.parent[w] = vars
         return result
 		
+def findPath(graph, start, end, path=[]):
+	path=path+ [start]
+	if(start==end):
+		return path
+	if(start in graph):
+		for node in graph[start]:
+			if node not in path:
+				newPath=findPath(graph, node, end, path)
+				if newPath:
+					return newPath
+	
+	return []
+	
+
+def findAllPaths(graph, start, end, path=[]):
+	#print "Finding path for start=", start, " end=", end
+	path=path+ [start]
+	
+	if(start==end):
+		return [path]
 		
+	if(start in graph):
+		paths=[]
+		for node in graph[start]:
+			if node not in path:
+				newPaths=findAllPaths(graph, node[0], end, path)
+				for newPath in newPaths:
+					paths.append(newPath)
+		return paths
+	return []
+	
 class DiagonalRun:
 	def __init__(self, diagonalNum, name=""):
 		self.hotspots=[]
@@ -72,11 +102,29 @@ class DiagonalRun:
 			self.value+=val
 			
 	def __str__(self):
-		return "Wow"
+		return self.name
 		
 	def printIt(self):
 		print "diag=", self.name, self.diag, ":", self.value, self.hotspots
 
+def createGraph(connections, subregions):
+	graph={}
+	
+	print"!!!!!!!!!!!!!CREATING GRAPH!!!!!!!!!!!!!!!!"
+	for con in connections:
+		start=con[0]
+		graph[start]=[]
+	
+	for con in connections:
+		start=con[0]
+		end=con[1]
+		cost=con[2]
+		#print start, end, cost
+		#print "Start=", start.name
+		graph[start].append( (end, cost) )
+	print "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"	
+	return graph
+		
 
 def distanceBetween(v, u):
 	
@@ -92,15 +140,24 @@ def distanceBetween(v, u):
 	if row_dist<0 or col_dist<0:
 		return -1
 	
-	print"--------Comparing distance between-------------"
-	v.printIt()
-	u.printIt()
-	print 
-	print "row, col V:", v_lastRow, v_lastCol, "row, col U:", u_firstRow, u_firstCol
-	print "dist:", row_dist, col_dist
-	print "------------------------------------------------!"
+	#print"--------Comparing distance between-------------"
+	#v.printIt()
+	#u.printIt()
+	#print 
+	#print "row, col V:", v_lastRow, v_lastCol, "row, col U:", u_firstRow, u_firstCol
+	#print "dist:", row_dist, col_dist
+	#print "------------------------------------------------!"
 	return max(row_dist, col_dist)
 	
+def printGraph(graph):
+	print "graph={"
+	for key in graph:
+		print "\t", key, ": [",
+		for dest in graph[key]:
+			cost=dest[1]
+			destNode=dest[0].name
+			print (destNode, cost),
+		print "]"
 		
 print "----------GRAPHS_-------------"
 
@@ -202,16 +259,35 @@ for d in diags:
 
 
 #create graph
-vertices=diags
-graph=[]
+subregions=diags
+connections=[]
 
-for v in vertices:
-	for u in vertices:
+for v in subregions:
+	for u in subregions:
 		if u!=v:
 			dist=distanceBetween(v,u)
 			if(dist>0):
-				graph.append((v,u, -dist))
+				connections.append((v, u, -dist))
 	
-print "NODES!"
-for node in graph:
+print "CONNECTIONS:"
+for node in connections:
 	print "(", node[0].name,",", node[1].name, ",", node[2], ")"
+	
+	
+graph=createGraph(connections, subregions)
+
+printGraph(graph)
+print
+
+paths=[]
+#for startNode in graph:
+	#print "\t", startNode
+	#startNode.printIt()
+	#for node in graph:
+		#paths.append(findPath(graph, startNode, node))
+		
+paths2=findAllPaths(graph,connections[0][0], connections[4][1])
+for path in paths2:
+	for node in path:	
+		print node,
+	print
