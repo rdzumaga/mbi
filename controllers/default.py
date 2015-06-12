@@ -9,23 +9,24 @@
 #########################################################################
 
 import NW
+import SW
 
 def algorithm():
 
     d = ""
 
 
-    form=FORM(DIV(LABEL('Sekwencja A:', _for="seqA", _class='col-sm-2 control-label'), DIV(INPUT(_id='seqA', _name='seqA', _type='text', _style='text-transform: uppercase', requires = IS_ALPHANUMERIC(error_message='Musisz podać AGCT'), _class='form-control', _placeholder = 'np. AAGCT'), _class='col-md-4'), _class='form-group', _id='seqADiv'),
+    form=FORM(DIV(LABEL('Sekwencja A:', _for="seqA", _class='col-sm-2 control-label'), DIV(INPUT(_id='seqA', _name='seqA', _type='text', _style='text-transform: uppercase', _class='form-control', _placeholder = 'np. AAGCT'), _class='col-md-4'), _class='form-group', _id='seqADiv'),
 
-              DIV(LABEL('Sekwencja B:', _for="seqB", _class='col-sm-2 control-label'), DIV(INPUT(_id='seqB', _name='seqB', _type='text', _style='text-transform: uppercase', requires = [IS_ALPHANUMERIC(error_message='Musisz podać AGCT')], _class='form-control', _placeholder = 'np. AAGCT'), _class='col-md-4'), _class='form-group',  _id='seqBDiv'),
+              DIV(LABEL('Sekwencja B:', _for="seqB", _class='col-sm-2 control-label'), DIV(INPUT(_id='seqB', _name='seqB', _type='text', _style='text-transform: uppercase',  _class='form-control', _placeholder = 'np. AAGCT'), _class='col-md-4'), _class='form-group',  _id='seqBDiv'),
 
-              DIV(LABEL('Kara za przerwę:', _for="break_penalty", _class='col-sm-2 control-label'), DIV(INPUT(_id='break_penalty', _name='break_penalty', requires=IS_INT_IN_RANGE(-10, 11,error_message='Musisz podać liczbę'), _class='form-control', _placeholder = 'np. -2'), _class='col-md-4'), _class='form-group', _id='seqCDiv'),
+              DIV(LABEL('Kara za przerwę:', _for="break_penalty", _class='col-sm-2 control-label'), DIV(INPUT(_id='break_penalty', _name='break_penalty', _class='form-control', _placeholder = 'np. -2'), _class='col-md-4'), _class='form-group', _id='seqCDiv'),
 
               DIV(DIV(DIV(LABEL(INPUT(_name='step', _id='checkBox' ,value=False,_type='checkbox'), 'Praca krokowa'), _class='checkbox'),_class='col-sm-offset-2 col-sm-4'), _class = 'form-group' ),
 
               INPUT(_id='iters', _name='iters', value='-1', _type='hidden')
 
-              #DIV(DIV(INPUT(_type='submit', _class='btn btn-primary btn-lg', _value='Wykonaj'),_class='col-sm-offset-2 col-sm-4'),_class='form-group')
+
               )
 
     form['_class']='form-horizontal'
@@ -33,13 +34,47 @@ def algorithm():
 
 
     if form.accepts(request.vars, session, keepvalues=True):
-        x=int(request.vars.break_penalty)
+        penalty=int(request.vars.break_penalty)
         iterx=int(request.vars.iters)
-        d=NW.needlemanWunsch(iterx, request.vars.seqA,request.vars.seqB, x)
+        d=NW.needlemanWunsch(iterx, request.vars.seqA,request.vars.seqB, penalty)
 
 
     return dict(form=form, d=d)
 
+def smithWaterman():
+
+	    d = ""
+
+
+            form=FORM(DIV(LABEL('Sekwencja A:', _for="seqA", _class='col-sm-2 control-label'), DIV(INPUT(_id='seqA', _name='seqA', _type='text', _style='text-transform: uppercase',  _class='form-control', _placeholder = 'np. AAGCT'), _class='col-md-4'), _class='form-group', _id='seqADiv'),
+
+            DIV(LABEL('Sekwencja B:', _for="seqB", _class='col-sm-2 control-label'), DIV(INPUT(_id='seqB', _name='seqB', _type='text', _style='text-transform: uppercase', _class='form-control', _placeholder = 'np. AAGCT'), _class='col-md-4'), _class='form-group',  _id='seqBDiv'),
+
+            DIV(LABEL('Kara za przerwę:', _for="break_penalty", _class='col-sm-2 control-label'), DIV(INPUT(_id='break_penalty', _name='break_penalty', _class='form-control', _placeholder = 'np. -2'), _class='col-md-4'), _class='form-group', _id='seqCDiv'),
+
+            DIV(LABEL('Zgodność:', _for="match", _class='col-sm-2 control-label'), DIV(INPUT(_id='match', _name='match', _class='form-control', _placeholder = 'np. -2'), _class='col-md-4'), _class='form-group', _id='matchDiv'),
+
+            DIV(LABEL('Niezgodność:', _for="mismatch", _class='col-sm-2 control-label'), DIV(INPUT(_id='mismatch', _name='mismatch', _class='form-control', _placeholder = 'np. -2'), _class='col-md-4'), _class='form-group', _id='mismatchDiv'),
+
+            DIV(DIV(DIV(LABEL(INPUT(_name='step', _id='checkBox' ,value=False,_type='checkbox'), 'Praca krokowa'), _class='checkbox'),_class='col-sm-offset-2 col-sm-4'), _class = 'form-group' ),
+
+            INPUT(_id='iters', _name='iters', value='-1', _type='hidden'))
+
+            form['_class']='form-horizontal'
+            form['_id']='myForm'
+
+
+            if form.accepts(request.vars, session, keepvalues=True):
+                penalty=int(request.vars.break_penalty)
+                iterx=int(request.vars.iters)
+                matchint = int(request.vars.match)
+                mismatchint = int(request.vars.mismatch)
+                d=SW.SmithWaterman(iterx, request.vars.seqA,request.vars.seqB, penalty, matchint, mismatchint)
+
+            if len(d) > 0:
+                print d[0]
+
+            return dict(form=form, d=d)
 
 
 

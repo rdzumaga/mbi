@@ -29,7 +29,7 @@ response.menu = [
 ]
 
 response.menu += [
-    (T("Algorytm Smitha–Watermana"), False, URL('default', 'algorithm'), [])
+    (T("Algorytm Smitha–Watermana"), False, URL('default', 'smithWaterman'), [])
 ]
 
 response.menu += [

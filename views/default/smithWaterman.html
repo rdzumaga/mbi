@@ -1,0 +1,155 @@
+{{extend 'layout.html'}}
+
+
+<div class="container-fluid">
+
+     <h1>Algorytm Smith'a-Waterman'a</h1>
+<br />
+    
+    <div class="row">
+        
+        <div class="col-md-5">
+            
+                
+
+
+{{=form}}
+
+
+
+</br>
+    <label class="col-sm-2 control-label">Macierz podobieństwa:</label>
+        </br></br>
+<table class="similarityMatrix table table-bordered table-condensed table-hover table-striped" >
+    <thead style="text-align:center;">
+        <tr>
+            <th><span class="glyphicon glyphicon-random"></span></th>
+            <th>A</th>
+            <th>G</th>
+            <th>C</th>
+            <th>T</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <th>A</th>
+            <td>10</td>
+            <td>-1</td>
+            <td>-3</td>
+            <td>-4</td>
+        </tr>
+        <tr>
+            <th>G</th>
+            <td>-1</td>
+            <td><i class="glyphicon glyphicon-arrow-down down" style=""></i><i class="glyphicon glyphicon-arrow-right down-right"></i><i class="glyphicon glyphicon-arrow-right right"></i>7</td>
+            <td>-5</td>
+            <td>-3</td>
+        </tr>
+        <tr>
+            <th>C</th>
+            <td>-3</td>
+            <td>-5</td>
+            <td>9</td>
+            <td>0</td>
+        </tr>
+        <tr>
+            <th>T</th>
+            <td>-4</td>
+            <td>-3</td>
+            <td>0</td>
+            <td>8</td>
+        </tr>
+    </tbody>
+</table>
+<div id="buttonPlace" class="col-md-offset-2"></div>
+
+
+        </div>
+		{{wynik=d}}
+
+		
+        {{if len(wynik) == 3 and request.vars.iters != '3':}}
+		<div class="col-md-5">
+            <h3>
+                Wynik dopasowania:
+            </h3>
+			<table class="outputTable table table-bordered table-condensed table-striped" style="text-align:center;">
+				<tr>
+					{{for letter in wynik[1]:}}<td><div>{{=letter}}</div></td>{{pass}}
+				</tr>
+				<tr>
+					{{for letter in wynik[2]:}}<td><div>{{=letter}}</div></td>{{pass}}
+				</tr>					
+			</table>
+			
+			<!--TABELA Z WYIKIEM DUZA!-->
+			
+			<table class="table table-bordered">
+				{{currentpen = (-int(request.vars.break_penalty))}}
+				<tr>
+					<th></th>
+					<th></th>
+					{{for letter in request.vars.seqB:}}<th>{{=letter}}</th>{{pass}}
+				</tr>
+				<tr>
+					<th></th>
+					{{for letter in ((request.vars.seqB+'x')):}}<th>{{=currentpen+int(request.vars.break_penalty)}}{{currentpen=currentpen+int(request.vars.break_penalty)}}</th>{{pass}}
+				</tr>
+				{{currentpen = 0}}{{iterator=-1}}
+				{{for letter in request.vars.seqA:}}
+				{{iterator = iterator + 1}}
+				<tr>
+					<th>{{=letter}}</th>
+					<th>{{=currentpen+int(request.vars.break_penalty)}}{{currentpen=currentpen+int(request.vars.break_penalty)}}</th>
+					{{for value in wynik[0][iterator]:}}<td>{{=value}}</td>{{pass}}
+				</tr>
+				{{pass}}
+				
+			</table>
+			
+			
+
+        </div>
+		{{elif len(wynik) > 0 and request.vars.iters != '-1':}}
+		<div class="col-md-5">
+			
+			
+			
+			{{i=1}}			
+			{{for val in wynik:}}
+			{{name = 'values' + str(i)}}
+			{{=INPUT(_id=name, _name=name, _value=val, _type='hidden')}}
+			{{i=i+1}}			
+			{{pass}}
+			
+			<table class="table table-bordered">
+				{{currentpen = (-int(request.vars.break_penalty))}}
+				<tr>
+					<th></th>
+					<th></th>
+					{{for letter in request.vars.seqB:}}<th>{{=letter}}</th>{{pass}}
+				</tr>
+				<tr>
+					<th></th>
+					{{for letter in ((request.vars.seqB+'x')):}}<th>{{=currentpen+int(request.vars.break_penalty)}}{{currentpen=currentpen+int(request.vars.break_penalty)}}</th>{{pass}}
+				</tr>
+				{{currentpen = 0}}{{currid=0}}
+				{{for letter in request.vars.seqA:}}
+				
+				<tr>
+					<th>{{=letter}}</th>
+					<th>{{=currentpen+int(request.vars.break_penalty)}}{{currentpen=currentpen+int(request.vars.break_penalty)}}</th>
+					{{for letter in request.vars.seqB:}}{{currid = currid + 1}}<td id="cell{{=currid}}"></td>{{pass}}
+				</tr>
+				{{pass}}
+				
+			</table>
+			
+		</div>
+		{{else:}}{{pass}}
+
+    </div>
+
+</div>
+
+<br /><br />

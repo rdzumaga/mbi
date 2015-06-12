@@ -22,16 +22,16 @@ def readBlosum(fname):
     return d
 
 def calcMatrix(seqVertical, seqHorizontal, blosum, penalty):
-    rows = len(seqVertical)+1 
-    cols = len(seqHorizontal)+1 
-    
+    rows = len(seqVertical)+1
+    cols = len(seqHorizontal)+1
+
     F = createMatrix(rows, cols)
-	
+
     for i in range(0, rows):
         F[i][0] = i * penalty
     for j in range(0, cols):
         F[0][j] = j * penalty
- 
+
     for i in range(1, rows):
         for j in range(1, cols):
             match = F[i-1][j-1] + blosum[(seqVertical[i-1], seqHorizontal[j-1])]
@@ -39,30 +39,30 @@ def calcMatrix(seqVertical, seqHorizontal, blosum, penalty):
             insert = F[i][j-1] + penalty
 
             F[i][j] = max(match, delete, insert)
- 
+
     return F
 
 def calcMatrixStepByStep(seqVertical, seqHorizontal, blosum, penalty, step):
-    rows = len(seqVertical)+1 
+    rows = len(seqVertical)+1
     cols = len(seqHorizontal)+1
     #rows=step/len(seqHorizontal)+1
     #cols=step%len(seqHorizontal)
     #print "step=", step, "rows=", rows, "cols=", cols
-    
+
     F = createMatrix(rows, cols)
 
     steps=[]
-	
+
     for i in range(0, rows):
         F[i][0] = i * penalty
     for j in range(0, cols):
         F[0][j] = j * penalty
-    
+
     counter=0
     for i in range(1, rows):
         for j in range(1, cols):
             counter+=1
-            
+
             #check if reached the indicated step nr
             if counter<=step:
                 #match or delete or insert =(value, row, col)
@@ -71,7 +71,7 @@ def calcMatrixStepByStep(seqVertical, seqHorizontal, blosum, penalty, step):
                 #match (diag)
                 diag=[F[i-1][j-1] + blosum[(seqVertical[i-1], seqHorizontal[j-1])],i-1, j-1]
                 possibilities.append(diag)
-               
+
                 #delete (up)
                 up=[F[i-1][j] + penalty, i-j, j]
                 possibilities.append(up)
@@ -89,9 +89,9 @@ def calcMatrixStepByStep(seqVertical, seqHorizontal, blosum, penalty, step):
                 F[i][j] = best[0]
             else:
                 break
-    
+
     return steps
-    
+
 def traceback(seq, seqRef, scoreMatrix, startPos, blosum,penalty):
     '''Find the optimal path through the matrix representing the alignment.
 
@@ -125,7 +125,7 @@ def traceback(seq, seqRef, scoreMatrix, startPos, blosum,penalty):
             alignedSeqRef.append(seqRef[j - 1])
             j -= 1
         step = nextStep(seq, seqRef, scoreMatrix, i, j,blosum, penalty)
-       
+
     return ''.join(reversed(alignedSeq)), ''.join(reversed(alignedSeqRef))
 
 
@@ -162,7 +162,7 @@ def createAlignmentString(alignedSeq, alignedSeqRef):
     # concatenation.
     idents, gaps, mismatches = 0, 0, 0
     alignmentString = []
-    
+
     for base1, base2 in zip(alignedSeq, alignedSeqRef):
         if base1 == base2:
             alignmentString.append('|')
@@ -194,13 +194,13 @@ def print_matrix(matrix):
         print
 
 def needlemanWunsch(step=-1, seq="GATTA", seqRef="GAATTC", penalty=-5):
-    blosum=readBlosum("blosum.txt")
+    blosum=readBlosum("applications/mbi/modules/blosum.txt")
     matrix=[]
-                                 
+
     if step>=0 and step<len(seq)*len(seqRef)+1:
         steps=calcMatrixStepByStep(seq, seqRef, blosum, penalty, step)
         return steps
-        
+
     matrix =calcMatrix(seq, seqRef, blosum, penalty)
     rightBottomCell=(len(seq), len(seqRef))
     seqAligned, seqRefAligned = traceback(seq, seqRef, matrix, rightBottomCell, blosum, penalty)
