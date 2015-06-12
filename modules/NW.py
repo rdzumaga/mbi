@@ -85,7 +85,7 @@ def calcMatrixStepByStep(seqVertical, seqHorizontal, blosum, penalty, step):
                     indexOfBest=2
 
                 best=possibilities[indexOfBest]
-                steps.append([best[0], best[1], best[2],  possibilities[0][0], possibilities[1][0], possibilities[2][0]])
+                steps.append([indexOfBest, best[1], best[2],  possibilities[0][0], possibilities[1][0], possibilities[2][0]])
                 F[i][j] = best[0]
             else:
                 break

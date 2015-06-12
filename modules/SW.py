@@ -94,6 +94,11 @@ def calcStep(steps, seq, seqRef, matrix, i, j, penalty, match, mismatch):
     '''Calculate score for a given position in the scoring matrix.
 
     The score is based on the up, left, and upper-left neighbors.
+	best index can take on following values:
+		0 - diag
+		1 - left
+		2 - up
+		3 - zero
     '''
     #print "steps: ", steps
     nextStep=[]
@@ -107,7 +112,7 @@ def calcStep(steps, seq, seqRef, matrix, i, j, penalty, match, mismatch):
     up = [matrix[i - 1][j] + penalty, i-1, j]
     possibilities.append(up)
     if(up[0]>diag[0]):
-	bestIndex=1
+        bestIndex=1
 
     left = [matrix[i][j - 1] + penalty, i, j-1]
     possibilities.append(left)
@@ -119,12 +124,11 @@ def calcStep(steps, seq, seqRef, matrix, i, j, penalty, match, mismatch):
         bestIndex=2
 
     if possibilities[bestIndex][0]<0:
-
-	bestIndex=3
+        bestIndex=3
 
     #print "possi[best]=",bestIndex, " ___________", diag, up, left
     best=possibilities[bestIndex]
-    steps.append([best[0], best[1], best[2],  possibilities[0][0], possibilities[1][0], possibilities[2][0]])
+    steps.append([bestIndex, best[1], best[2],  possibilities[0][0], possibilities[1][0], possibilities[2][0]])
 
     return steps, possibilities[bestIndex][0]
 
