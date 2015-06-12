@@ -1,62 +1,23 @@
 import copy
-class ShortestPathResult(object):
-	def __init__(self):
-                self.d = {}
-                self.parent = {}
 
-				
-def shortest_path(graph, s):
-        """Single source shortest paths using DP on a DAG.
-        Args:
-        graph: weighted DAG.
-        s: source
-        """
-        result = ShortestPathResult()
-        result.d[s] = 0
+class DiagonalRun:
+	def __init__(self, diagonalNum, name=""):
+		self.hotspots=[]
+		self.value=0
+		self.diag=diagonalNum
+		self.name=name
+	
+	def add(self, i,j, val=2):
+		if (i,j) not in self.hotspots:
+			self.hotspots.append((i,j))
+			self.value+=val
+			
+	def __str__(self):
+		return self.name
+		
+	def printIt(self):
+		print "diag=", self.name, self.diag, ":", self.value, self.hotspots
 
-        result.parent[s] = None
-        for v in graph.itervertices():
-                result=sp_dp(graph, v, result)
-        return result
-
-def sp_dp(graph, v, result):
-        """Recursion on finding the shortest path to v.
-         Args:
-                 graph: weighted DAG.
-                 v: a vertex in graph.
-                 result: for memoization and keeping track of the result.
-        """
-        if v in result.d:
-                return result.d[v]
-        result.d[v] = float('inf')
-        result.parent[v] = None
-        for u in graph.inverse_neighbors(v): # Theta(indegree(v))
-                new_distance = sp_dp(graph, u, result) + graph.weight(u, v)
-                if new_distance < result.d[v]:
-                        result.d[v] = new_distance
-                        result.parent[v] = unic
-        return result.d[v]
-
-
-def shortest_path_bottomup(graph, s):
-        """Bottom-up DP for finding single source shortest paths on a DAG.
-        Args:
-                graph: weighted DAG.
-                s: source
-        """
-        order = topological_sort(graph)
-        result = ShortestPathResult()
-        for v in graph.itervertices():
-                result.d[v] = float('inf')
-                result.parent[v] = None
-        result.d[s] = 0
-        for v in order:
-                for w in graph.neighbors(v):
-                        new_distance = result.d[v] + graph.weight(v, w)
-                        if result.d[w] > new_distance:
-                                result.d[w] = new_distance
-                                result.parent[w] = vars
-        return result
 		
 def findShortestPath(graph, start, end, path=[], value=0):
 	path=path+ [start]
@@ -107,24 +68,6 @@ def findAllPaths(graph, start, end, path=[]):
 					paths.append(newPath)
 		return paths
 	return []
-	
-class DiagonalRun:
-	def __init__(self, diagonalNum, name=""):
-		self.hotspots=[]
-		self.value=0
-		self.diag=diagonalNum
-		self.name=name
-	
-	def add(self, i,j, val=2):
-		if (i,j) not in self.hotspots:
-			self.hotspots.append((i,j))
-			self.value+=val
-			
-	def __str__(self):
-		return self.name
-		
-	def printIt(self):
-		print "diag=", self.name, self.diag, ":", self.value, self.hotspots
 
 def createGraph(connections, subregions):
 	graph={}

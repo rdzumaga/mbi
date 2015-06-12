@@ -1,4 +1,4 @@
-
+import graph
 seqRef1="GAATTC"
 seq1="GATTA"
 
@@ -18,65 +18,6 @@ k=2
 cutoff=10 
 
 
-class ShortestPathResult(object):
-	def __init__(self):
-                self.d = {}
-                self.parent = {}
-
-def shortest_path(graph, s):
-        """Single source shortest paths using DP on a DAG.
-        Args:
-        graph: weighted DAG.
-        s: source
-        """
-        result = ShortestPathResult()
-        result.d[s] = 0
-
-        result.parent[s] = None
-        for v in graph.itervertices():
-                result=sp_dp(graph, v, result)
-        return result
-
-def sp_dp(graph, v, result):
-        """Recursion on finding the shortest path to v.
-         Args:
-                 graph: weighted DAG.
-                 v: a vertex in graph.
-                 result: for memoization and keeping track of the result.
-        """
-        if v in result.d:
-                return result.d[v]
-        result.d[v] = float('inf')
-        result.parent[v] = None
-        for u in graph.inverse_neighbors(v): # Theta(indegree(v))
-                new_distance = sp_dp(graph, u, result) + graph.weight(u, v)
-                if new_distance < result.d[v]:
-                        result.d[v] = new_distance
-                        result.parent[v] = unic
-        return result.d[v]
-
-
-def shortest_path_bottomup(graph, s):
-        """Bottom-up DP for finding single source shortest paths on a DAG.
-        Args:
-                graph: weighted DAG.
-                s: source
-        """
-        order = topological_sort(graph)
-        result = ShortestPathResult()
-        for v in graph.itervertices():
-                result.d[v] = float('inf')
-                result.parent[v] = None
-        result.d[s] = 0
-        for v in order:
-                for w in graph.neighbors(v):
-                        new_distance = result.d[v] + graph.weight(v, w)
-                        if result.d[w] > new_distance:
-                                result.d[w] = new_distance
-                                result.parent[w] = vars
-        return result
-
-
 
 def getTuplesList(str):
 	tuples=set()
@@ -92,7 +33,7 @@ def getTuplesList(str):
 		tuplesDict[tuple].append(i)
 	return tuples,tuplesDict
 	
-def createDiagonalDict():
+def createDiagonalDict0():
 	#TODO: verify that
 	#diagonalNum=rows+cols-2*k+1
 
@@ -101,6 +42,20 @@ def createDiagonalDict():
 		diagonalIndexDict[row]=0
 	for col in range(1, cols-k+1):
 		diagonalIndexDict[-col]=0
+	return diagonalIndexDict
+	
+def createDiagonalDict(seq, seqRef):
+	#TODO: verify that
+	#diagonalNum=rows+cols-2*k+1
+	
+	rows=len(seq)
+	cols=len(seqRef)
+	diagonalIndexDict={}
+	
+	for row in range(0, rows-k+1):
+		diagonalIndexDict[row]=[graph.DiagonalRun(row, str(row)+".0")]
+	for col in range(1, cols-k+1):
+		diagonalIndexDict[-col]=[graph.DiagonalRun(-col, str(-col)+".0")]
 	return diagonalIndexDict
 	
 def createDiagonalDictFrom(bestDiagonals):
@@ -119,18 +74,30 @@ def createHotspotsDict():
 	for col in range(1, cols-k+1):
 		diagonalIndexDict[-col]=[]
 	return diagonalIndexDict
+def initDiagonals(seq, seqRef):
+	diags=[]
+	rows=len(seq)
+	cols=len(seqRef)
 	
-def calcDiagonalSums(tuplesRef, tuplesRefDict):
+	for row in range(0, rows-k+1):
+		diagonal=[graph.DiagonalRun(row, str(row)+".0")]
+		diags.append(diagonal)
+	for col in range(1, cols-k+1):
+		diagonal=[graph.DiagonalRun(-col, str(row)+".0")]
+		diags.append(diagonal)
+	return diags
+	
+def calcDiagonalSums0(tuplesRef, tuplesRefDict):
 	diagonalSums=createDiagonalDict()
 	hotspotRows=createHotspotsDict()
 	#scoreMatrix=[[0 for col in range(cols)] for row in range(rows)]
 
 	for row in range(0, rows-k+1):
 		tuple=seq[row:row+k]	
-		if tuple in tuplesRef:
-			
+		if tuple in tuplesRef:			
 			for col in tuplesRefDict[tuple]:
 				offset=row-col
+
 				diagonalSums[offset]+=1
 				hotspotRows[offset].append(row)
 	
@@ -151,6 +118,32 @@ def calcDiagonalSums(tuplesRef, tuplesRefDict):
 	print "tuplesRefDict (hotspotCols):"
 	print tuplesRefDict
 	return answer, hotspotRows
+	
+def calcDiagonalSums(seq, seqRef,tuplesRef, tuplesRefDict):
+	#diagonalSums=createDiagonalDict0()
+	diagonalDict=createDiagonalDict(seq, seqRef)
+	
+	#hotspotRows=createHotspotsDict()
+	#scoreMatrix=[[0 for col in range(cols)] for row in range(rows)]
+	rows=len(seq)
+	cols=len(seqRef)
+	
+	for row in range(0, rows-k+1):
+		tuple=seq[row:row+k]	
+		if tuple in tuplesRef:			
+			for col in tuplesRefDict[tuple]:
+				offset=row-col
+				diagonalDict[offset][0].value+=1
+				diagonalDict[offset][0].hotspots.append((row,col))
+								
+				#diagonalSums[offset]+=1#
+				#hotspotRows[offset].append(row)#
+	
+	print "Found following hotspots"
+	for diag in diagonalDict:
+		diagonalDict[diag][0].printIt()
+	
+	return diagonalDict
 
 def scoreDiagonals(diagonalSumDict, hotspotRows):
 	"""
@@ -258,8 +251,7 @@ def rescoreDiagonals(blosum,bestDiagonals,hotspotRows):
 	print bestRescoredDiagonals
 	return bestRescoredDiagonals
 
-	
-def createMatrixForDots(diagonalSumDict, hotspotRows):
+def createMatrixForDots0(diagonalSumDict, hotspotRows):
 	"""
 	just for debugging. drawing dot matrix is unnecessary since it takes too much memory to remember all values
 	"""
@@ -271,6 +263,26 @@ def createMatrixForDots(diagonalSumDict, hotspotRows):
 			if(col<cols):
 				#print "row=", row, "col=", col
 				if(row in hotspotRows[diag]):
+					scoreMatrix[row][col]=1
+				else:
+					scoreMatrix[row][col]=0
+	return scoreMatrix	
+	
+def createMatrixForDots(diagonalDict, seq, seqRef):
+	"""
+	just for debugging. drawing dot matrix is unnecessary since it takes too much memory to remember all values
+	"""
+	rows=len(seq)
+	cols=len(seqRef)
+	scoreMatrix=[[0 for col in range(cols)] for row in range(rows)]
+	
+	for diag in diagonalDict:
+		firstRow=0 if diag<=0 else diag
+		for row in range(firstRow,rows-k+1):
+			col=row-diag
+			if(col<cols):
+				#print "row=", row, "col=", col
+				if (row,col) in diagonalDict[diag][0].hotspots:
 					scoreMatrix[row][col]=1
 				else:
 					scoreMatrix[row][col]=0
@@ -497,13 +509,10 @@ blosum=readBlosum("blosum.txt")#
 # 1.identify common k-words between I (seq) and J(seqRef)
 print "\n=======================================\n                STEP1\n=======================================\n"
 tuplesRef,tuplesRefDict=getTuplesList(seqRef)
-diagonalSumsDict, hotspotRows=calcDiagonalSums(tuplesRef,tuplesRefDict)
+diagonalDict=calcDiagonalSums(seq, seqRef, tuplesRef,tuplesRefDict)
+#diagonalSumsDict, hotspotRows=calcDiagonalSums(tuplesRef,tuplesRefDict)
 
-
-print 
-print diagonalSumsDict
-
-matrix=createMatrixForDots(diagonalSumsDict, hotspotRows)
+matrix=createMatrixForDots(diagonalDict,seq, seqRef)
 printDotMatrix(matrix)
 
 # 2a. Score diagonals with k-word matches and identify 10 best diagonals
@@ -516,8 +525,6 @@ print "bestTenDiagonals:\n", betsTenDiagonals
 print "\n=======================================\n                STEP3\n=======================================\n"
 rescoredDiagonals=rescoreDiagonals(blosum, betsTenDiagonals, hotspotRows)
 print "rescoredDiagonals:\n", rescoredDiagonals
-
-
 
 
 
