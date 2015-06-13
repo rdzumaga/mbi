@@ -139,13 +139,19 @@ def calcDiagonalSums(seq, seqRef,tuplesRef, tuplesRefDict):
 				#diagonalSums[offset]+=1#
 				#hotspotRows[offset].append(row)#
 	
-	print "Found following hotspots"
+	#get rid of entries with sum==0
+	goodDiagonalDict=dict(diagonalDict)
 	for diag in diagonalDict:
-		diagonalDict[diag][0].printIt()
+		if diagonalDict[diag][0].value==0:
+			del goodDiagonalDict[diag]
+			
+	print "Found following hotspots"
+	for diag in goodDiagonalDict:
+		goodDiagonalDict[diag][0].printIt()
 	
-	return diagonalDict
+	return goodDiagonalDict
 
-def scoreDiagonals(diagonalSumDict, hotspotRows):
+def scoreDiagonals0(diagonalSumDict, hotspotRows):
 	"""
 	In order to evaluate each diagonal run, FASTA gives each hot spot a positive score,
 	and the space between consecutive hot spots in a run is given a negative score that
@@ -200,9 +206,66 @@ def scoreDiagonals(diagonalSumDict, hotspotRows):
 		rescoredDiagonals=getTopDiagonals(getTopDiagonals)
 	return rescoredDiagonals
 
+def scoreDiagonals(diagonalDict, seq, seqRef):
+	"""
+	In order to evaluate each diagonal run, FASTA gives each hot spot a positive score,
+	and the space between consecutive hot spots in a run is given a negative score that
+	decreases with the increasing distance. The score of the diagonal run is the sum of the
+	hot spots scores and the interspot scores. FASTA finds the 10 highest scoring diagonal
+	runs under this evaluating scheme.
+
+	"""
+	rows=len(seq)
+	cols=len(seqRef)
+	rescoredDiagonals=dict(diagonalDict)
+	reward=20 #this should be some kind of positive value
+
+	for diag in diagonalDict:
+		print "diag=",diag
+		
+		firstRow=0 if diag<=0 else diag	
+		gapPenalty=-reward/2 #this should be some kind of negative value
+		interspotPenaltySum=0
+		sum=0
+		
+		#for each row, score the cell and update diagonalSums
+		for row in range(firstRow,rows-k+1):
+			col=row-diag
+			
+			# check if col within boundaries
+			if(col<cols):
+				hotspot=row in diagonalDict[diag][0].hotspots
+				
+				#if for this col there is a gap between two hotspots: 
+				#(sum>0 indicates at least 1 hotspot was found before)
+				if(hotspot==False and sum>0):
+					#sum penalties for each consecutive gap
+					interspotPenaltySum+=gapPenalty
+					
+					#make sure penalty stays a negativ value (in case there were too many consecutive gaps)
+					if(gapPenalty<0):
+						#each consecutive gap has less of a penalty
+						gapPenalty+=1
+										
+				elif hotspot:
+					#sum the reward and add the penalty for the gaps between this hotspot and the previous one
+					sum=sum+reward+interspotPenaltySum
+					
+					#since a hotspot was found, reset the interspotPenaltySum and revert to the initial gapPenalty value
+					interspotPenaltySum=0
+					gapPenalty=-reward/2
+				#print "row=", row, "sum=", sum, "gapPenalty=", interspotPenaltySum
+		
+		rescoredDiagonals[diag][0].value=sum
+		sum=0
+	
+	if(len(rescoredDiagonals)>10):
+		rescoredDiagonals=getTopDiagonals(getTopDiagonals)
+	return rescoredDiagonals
+	
 def getTopDiagonals(diagonals):	
 	#get keys for the top ten diagonal sums			
-	keysForBestDiagonals=sorted(diagonals, key=diagonals.__getitem__, reverse=True)
+	keysForBestDiagonals=sorted(diagonals, key=diagonals.__getitem__[0].value, reverse=True)
 	keysForBestDiagonals=keysForBestDiagonals[0:11]
 
 	#get updated diagonals dictionary
@@ -225,7 +288,7 @@ def getTopDiagonals(diagonals):
 		print keysForBestDiagonals[i]"""	
 
 
-def rescoreDiagonals(blosum,bestDiagonals,hotspotRows):
+def rescoreDiagonals0(blosum,bestDiagonals,hotspotRows):
 
 	rescoredDiagonals=createDiagonalDictFrom(bestDiagonals)
 	print rescoredDiagonals			
@@ -251,6 +314,31 @@ def rescoreDiagonals(blosum,bestDiagonals,hotspotRows):
 	print bestRescoredDiagonals
 	return bestRescoredDiagonals
 
+def rescoreDiagonals(seq, seqRef, blosum, bestDiagonals):
+	rescoredDiagonals=createDiagonalDictFrom(bestDiagonals)
+	print rescoredDiagonals			
+	#iterate over diagonals and score the with blosum matrix
+	for diag in bestDiagonals:
+		for row, col in diagonalDict[diag][0].hotspots:
+		#for row in diagonalDict[diag][0].hotspots:
+			#col=row-diag
+			print "row=", row, "col=", col, "diag=", diag
+			#print "blosum(seq[", row,"], seqRef[", col,"]= blosum[", seq[row], seq[col],"]"
+			rescoredDiagonals[diag]+=blosum[(seq[row], seqRef[col])]
+		
+	
+	#remove diagonals with scores below a cutoff threshold
+	bestRescoredDiagonals=dict(rescoredDiagonals)
+	
+	print rescoredDiagonals
+	
+	for diag in rescoredDiagonals:
+		if rescoredDiagonals[diag]<cutoff:
+			del bestRescoredDiagonals[diag]
+			
+	print
+	print bestRescoredDiagonals
+	return bestRescoredDiagonals
 def createMatrixForDots0(diagonalSumDict, hotspotRows):
 	"""
 	just for debugging. drawing dot matrix is unnecessary since it takes too much memory to remember all values
@@ -336,25 +424,7 @@ def readBlosum(fname):
             d[(a1, a2)] = int(score)
     return d
 
-def needlemanWunsch(seqVertical, seqHorizontal, blosum, penalty):
-    rows = len(seqVertical)+1 
-    cols = len(seqHorizontal)+1 
-    
-    F = create_matrix(rows, cols)
- 
-    for i in range(0, rows):
-        F[i][0] = i * penalty
-    for j in range(0, cols):
-        F[0][j] = j * penalty
- 
-    for i in range(1, rows):
-        for j in range(1, cols):
-            match = F[i-1][j-1] + blosum[(seqVertical[i-1], seqHorizontal[j-1])]
-            delete = F[i-1][j] + penalty
-            insert = F[i][j-1] + penalty
-            F[i][j] = max(match, delete, insert)
- 
-    return F
+
 
 
 def traceback(scoreMatrix, startPos, blosum):
@@ -517,13 +587,14 @@ printDotMatrix(matrix)
 
 # 2a. Score diagonals with k-word matches and identify 10 best diagonals
 print "\n=======================================\n                STEP2\n=======================================\n"
-betsTenDiagonals=scoreDiagonals(diagonalSumsDict, hotspotRows)
-print "bestTenDiagonals:\n", betsTenDiagonals
+bestTenDiagonals=scoreDiagonals(diagonalDict,seq, seqRef)
+print "bestTenDiagonals:\n", bestTenDiagonals
 
 
 # 3. Rescore initial regions with a substitution score matrix and get best 10 subregions
 print "\n=======================================\n                STEP3\n=======================================\n"
-rescoredDiagonals=rescoreDiagonals(blosum, betsTenDiagonals, hotspotRows)
+#rescoredDiagonals=rescoreDiagonals(blosum, betsTenDiagonals, hotspotRows)
+rescoredDiagonals=rescoreDiagonals(seq, seqRef, blosum, bestTenDiagonals)
 print "rescoredDiagonals:\n", rescoredDiagonals
 
 
