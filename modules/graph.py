@@ -70,7 +70,7 @@ def findAllPaths(graph, start, end, path=[]):
 	return []
 
 def createGraph(subregions):
-	
+	print"!!!!!!!!!!!!!CREATING GRAPH!!!!!!!!!!!!!!!!"
 	#find possible connections between regions
 	connections=[]
 	for v in subregions:
@@ -81,7 +81,10 @@ def createGraph(subregions):
 					connections.append((v, u, -dist))
 	
 	graph={}
-	print"!!!!!!!!!!!!!CREATING GRAPH!!!!!!!!!!!!!!!!"
+	
+	if len(connections)==0:
+		return None
+		
 	for con in connections:
 		start=con[0]
 		graph[start]=[]

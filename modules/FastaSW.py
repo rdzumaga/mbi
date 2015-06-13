@@ -137,38 +137,6 @@ def calcStep(steps, seq, seqRef, matrix, i, j, penalty, match, mismatch):
 
     return steps, possibilities[bestIndex][0]
 
-def calcMatrixStepByStep(step, seq, seqRef, penalty, match, mismatch):
-    rows=len(seq)+1
-    cols=len(seqRef)+1
-
-    #initialize the matrix with 0
-    scoreMatrix = [[0 for col in range(cols)] for row in range(rows)]
-    steps=[]
-
-    maxScore = 0
-    bestPos   = None    # i and j index for matrix cell with highest score
-
-    counter=0
-    # Fill the scoring matrix.
-    for i in range(1, rows):
-        for j in range(1, cols):
-	    counter+=1
-
-	    #check if reached the indicated step nr
-            if counter<=step:
-                steps, score = calcStep(steps,seq, seqRef, scoreMatrix, i, j, penalty, match, mismatch)
-                if score > maxScore:
-                    maxScore = score
-                    bestPos   = (i, j)
-            else:
-                break
-
-	    scoreMatrix[i][j] = score
-
-
-    assert bestPos is not None, 'position with the highest score not found'
-    return scoreMatrix, steps
-
 
 def traceback(scoreMatrix, startPos, seq, seqRef, penalty, match, mismatch):
     '''Find the optimal path through the matrix representing the alignment.
@@ -207,6 +175,7 @@ def traceback(scoreMatrix, startPos, seq, seqRef, penalty, match, mismatch):
             j -= 1
         
         step,score = nextStep(scoreMatrix, i, j, seq, seqRef, penalty, match, mismatch,newscore)
+		
 
     return ''.join(reversed(alignedSeq)), ''.join(reversed(alignedSeqRef)), score
 
@@ -229,7 +198,7 @@ def nextStep(scoreMatrix, i, j, seq, seqRef, penalty, match, mismatch,score):
     if (val==left+penalty):
         return 3, score+scoreMatrix[i][j]
 
-    return 0, score
+    return 0, score+scoreMatrix[i][j]
 
 """    if diag >= up and diag >= left:     # Tie - DIAG step "wins".
         return 1 if diag != 0 else 0    # 1 signals a DIAG step. 0 signals the end.

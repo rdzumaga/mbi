@@ -7,10 +7,14 @@ seq1="GATTA"
 seqRefk="AACACTTTTCAAT"
 seqk="ACTTATCA"
 
-seqRef="CCATCGCCATCGG"
+
 #seq="GCATCGGC"
 #seq="ACATCTCCAGCG"
-seq="CTCGCACATGG"
+seqRefa="CCATCGCCATCGG"
+seqa="CTCGCACATGG"
+
+seqRef="ACCTGTTAAC"
+seq="GCCTTGTAA"
 
 
 
@@ -236,10 +240,10 @@ def scoreDiagonals(diagonalDict, seq, seqRef):
 					region=graph.DiagonalRun(diag,str(diag)+"."+str(regionNr))
 					regionNr+=1
 						
-			region.value+=reward
-			region.hotspots.append(hspots[i])	
+			region.add(hspots[i][0], hspots[i][1])	
 			region.printIt()
 		rescoredDiagonals[diag].append(copy.copy(region))
+
 			
 	#TODO check if regions would have a better score when combined with others, inspite of gaps
 		
@@ -386,12 +390,16 @@ def rescoreDiagonals(seq, seqRef, blosum, bestDiagonals):
 	return bestRescoredDiagonals
 	
 def listAllRegions(diagonalRegionsDict):
+	print "LISTING all regions"
 	regions=[]
 	for diag in diagonalRegionsDict:
+		#diagonalRegionsDict[diag].printIt() 
 		for region in diagonalRegionsDict[diag]:
+			region.printIt()
 			regions.append(region)
-	
+	print
 	return regions
+	
 def createMatrixForDots0(diagonalSumDict, hotspotRows):
 	"""
 	just for debugging. drawing dot matrix is unnecessary since it takes too much memory to remember all values
@@ -600,14 +608,15 @@ def printDotMatrix(matrix):
 def printMatrix(matrix):
 	#print ref sequence's nukleotides
 	print
-	print"    ",
+	print"        ",
 	for n in range(cols):
 		print seqRef[n], "  ",
 	print
 	#print sequence's nukleotides and "o" if a dot should be printed
 	i=0
 	for row in matrix:
-		print seq[i],
+		if i<len(seq):
+			print seq[i],
 		i+=1
 		for col in row:
 			if col!=0:
@@ -616,6 +625,41 @@ def printMatrix(matrix):
 				print "    ",
 		print
 
+def findPathBetween(startPos, destRegion):
+		path=[]
+		dest=destRegion.hotspots[0]
+		next=(startPos[0]+1, startPos[1]+1)
+		while(next[0]<dest[0] and next[1]< dest[1]):
+			path.append(next)
+			next=(next[0]+1, next[1]+1)
+		
+		if (next!=dest):
+			di=0
+			dj=0
+			if next[0]==dest[0]:
+				next=(next[0]-1, next[1])
+				dj=1		
+			elif next[1]==dest[1]:
+				next=(next[0], next[1]-1)
+				di=1
+				
+			while(next[0]!=dest[0] and next[1]!=dest[1]):
+				path.append(next)
+				next=(next[0]+di, next[1]+dj)
+		
+		return path
+				
+def findPathWithHoles(regionsPath):
+	if len(regionsPath)==0:
+		print "DEAD END!"
+		return None
+	startRegion=regionsPath[0]
+	path=startRegion.hotspots
+	for region in regionsPath[1:]:
+		path+=findPathBetween(path[-1], region)
+		path+=region.hotspots
+		
+	return path	
 		
 print "---------FASTA-----\n"
 rows=len(seq)
@@ -651,75 +695,48 @@ print "\n=======================================\n                STEP3\n=======
 #rescoredDiagonals=rescoreDiagonals(blosum, betsTenDiagonals, hotspotRows)
 diagonalRegionsDict=rescoreDiagonals(seq, seqRef, blosum, bestTenDiagonals)
 
+if len(diagonalRegionsDict)>0:
 
-
-#4. Join initial regions using gaps, penalise for gaps
-print "\n=======================================\n                STEP4\n=======================================\n"
-
-def findPathBetween(startPos, destRegion):
+	#4. Join initial regions using gaps, penalise for gaps
+	print "\n=======================================\n                STEP4\n=======================================\n"
+			
+	mygraph=graph.createGraph(listAllRegions(diagonalRegionsDict))
+	if mygraph==None:
+		print" END!"
+		#return "ERROR"
 	path=[]
-	dest=destRegion.hotspots[0]
-	next=(startPos[0]+1, startPos[1]+1)
-	while(next[0]<dest[0] and next[1]< dest[1]):
-		path.append(next)
-		next=(next[0]+1, next[1]+1)
-	
-	if (next!=dest):
-		di=0
-		dj=0
-		if next[0]==dest[0]:
-			next=(next[0]-1, next[1])
-			dj=1		
-		elif next[1]==dest[1]:
-			next=(next[0], next[1]-1)
-			di=1
+	value=0
+	for startNode in mygraph:
+		print "ooooooooooooooooooooooooooooooooooooooooo"
+		for node in mygraph[startNode]:
+			path, value=graph.findBestPath(mygraph, startNode, node[0])
+			print value,
+			if path:
+				for n in path:	
+					print n, "->",
+			print
 			
-		while(next[0]!=dest[0] and next[1]!=dest[1]):
-			path.append(next)
-			next=(next[0]+di, next[1]+dj)
-	
-	return path
-			
-def findPathWithHoles(regionsPath):
-	startRegion=regionsPath[0]
-	path=startRegion.hotspots
-	for region in regionsPath[1:]:
-		path+=findPathBetween(path[-1], region)
-		path+=region.hotspots
 		
-	return path
-	
+	# 5. Perform dynamic programming to find final alignments
+	print "\n=======================================\n                STEP5\n=======================================\n"
+	#list all cells on the path starting with first diagonal run and ending with the last one from the path found before
+	print "path len=",len(path)
+	rowColPath=findPathWithHoles(path)
+	if rowColPath==None:
+		print "ERror"
+		#return "Error"
+	else:	
+		print "Final path (before NW):"
+		print rowColPath
 
-			
-mygraph=graph.createGraph(listAllRegions(diagonalRegionsDict))
-path=[]
-value=0
-for startNode in mygraph:
-	print "ooooooooooooooooooooooooooooooooooooooooo"
-	for node in mygraph[startNode]:
-		path, value=graph.findBestPath(mygraph, startNode, node[0])
-		print value,
-		if path:
-			for n in path:	
-				print n, "->",
+		matrix, seqAligned, seqRefAligned,score=FastaSW.SmithWaterman(seq, seqRef, rowColPath, k)
+
+
 		print
-		
-	
-# 5. Perform dynamic programming to find final alignments
-
-#list all cells on the path starting with first diagonal run and ending with the last one from the path found before
-rowColPath=findPathWithHoles(path)
-print "Final path (before NW):"
-print rowColPath
-
-matrix, seqAligned, seqRefAligned,score=FastaSW.SmithWaterman(seq, seqRef, rowColPath, k)
-
-
-print
-print seqAligned
-print seqRefAligned
-print score
-printMatrix(matrix)
+		print seqAligned
+		print seqRefAligned
+		print score
+		printMatrix(matrix)
 
 
 
