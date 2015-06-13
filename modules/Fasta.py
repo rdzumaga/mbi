@@ -588,8 +588,10 @@ def print_matrix(matrix):
         print
 
 		
-def printDotMatrix(matrix):
+def printDotMatrix(seq, seqRef, matrix):
 	#print ref sequence's nukleotides
+	rows=len(seq)
+	cols=len(seqRef)
 	print
 	print" ",
 	for n in range(cols):
@@ -605,8 +607,10 @@ def printDotMatrix(matrix):
 				print " ",
 		print
 
-def printMatrix(matrix):
+def printMatrix(seq, seqRef, matrix):
 	#print ref sequence's nukleotides
+	rows=len(seq)
+	cols=len(seqRef)
 	print
 	print"        ",
 	for n in range(cols):
@@ -650,6 +654,10 @@ def findPathBetween(startPos, destRegion):
 		return path
 				
 def findPathWithHoles(regionsPath):
+	print "FIND path with holes"
+	print "We are connection the following hotspots:"
+	for region in regionsPath:
+		region.printIt()
 	if len(regionsPath)==0:
 		print "DEAD END!"
 		return None
@@ -661,71 +669,71 @@ def findPathWithHoles(regionsPath):
 		
 	return path	
 		
-print "---------FASTA-----\n"
-rows=len(seq)
-cols=len(seqRef)
-print "Comparing:"
-print "Query=    ", seq, " with"
-print "Reference=", seqRef
-blosum=readBlosum("blosum.txt")#
-
-# 1.identify common k-words between I (seq) and J(seqRef)
-print "\n=======================================\n                STEP1\n=======================================\n"
-tuplesRef,tuplesRefDict=getTuplesList(seqRef)
-diagonalDict=calcDiagonalSums(seq, seqRef, tuplesRef,tuplesRefDict)
-#diagonalSumsDict, hotspotRows=calcDiagonalSums(tuplesRef,tuplesRefDict)
-
-matrix=createMatrixForDots(diagonalDict,seq, seqRef)
-printDotMatrix(matrix)
-
-# 2a. Score diagonals with k-word matches and identify 10 best diagonals
-print "\n=======================================\n                STEP2\n=======================================\n"
-bestTenDiagonals=scoreDiagonals(diagonalDict,seq, seqRef)
-print "BestTenDiagonals:"
-for diag in bestTenDiagonals:
-	print diag, 
-	for reg in bestTenDiagonals[diag]:
-		print reg.hotspots, reg.value,
-	print
-
-
-
-# 3. Rescore initial regions with a substitution score matrix and get best 10 subregions
-print "\n=======================================\n                STEP3\n=======================================\n"
-#rescoredDiagonals=rescoreDiagonals(blosum, betsTenDiagonals, hotspotRows)
-diagonalRegionsDict=rescoreDiagonals(seq, seqRef, blosum, bestTenDiagonals)
-
-if len(diagonalRegionsDict)>0:
-
-	#4. Join initial regions using gaps, penalise for gaps
-	print "\n=======================================\n                STEP4\n=======================================\n"
-			
-	mygraph=graph.createGraph(listAllRegions(diagonalRegionsDict))
-	if mygraph==None:
-		print" END!"
-		#return "ERROR"
-	path=[]
-	value=0
-	for startNode in mygraph:
-		print "ooooooooooooooooooooooooooooooooooooooooo"
-		for node in mygraph[startNode]:
-			path, value=graph.findBestPath(mygraph, startNode, node[0])
-			print value,
-			if path:
-				for n in path:	
-					print n, "->",
-			print
-			
+def calcE(seq, seqRef,blosum=""):
+	if len(blosum)==0:
+		blosum=readBlosum("blosum.txt")
 		
-	# 5. Perform dynamic programming to find final alignments
-	print "\n=======================================\n                STEP5\n=======================================\n"
-	#list all cells on the path starting with first diagonal run and ending with the last one from the path found before
-	print "path len=",len(path)
-	rowColPath=findPathWithHoles(path)
-	if rowColPath==None:
-		print "ERror"
-		#return "Error"
-	else:	
+	rows=len(seq)
+	cols=len(seqRef)
+	
+	# 1.identify common k-words between I (seq) and J(seqRef)
+	print "\n=======================================\n                STEP1\n=======================================\n"
+	tuplesRef,tuplesRefDict=getTuplesList(seqRef)
+	diagonalDict=calcDiagonalSums(seq, seqRef, tuplesRef,tuplesRefDict)
+	
+	matrix=createMatrixForDots(diagonalDict,seq, seqRef)#
+	printDotMatrix(seq, seqRef, matrix)#
+
+	# 2a. Score diagonals with k-word matches and identify 10 best diagonals
+	print "\n=======================================\n                STEP2\n=======================================\n"
+	bestTenDiagonals=scoreDiagonals(diagonalDict,seq, seqRef)
+	print "BestTenDiagonals:"
+	for diag in bestTenDiagonals:
+		print diag, 
+		for reg in bestTenDiagonals[diag]:
+			print reg.hotspots, reg.value,
+		print
+
+
+
+	# 3. Rescore initial regions with a substitution score matrix and get best 10 subregions
+	print "\n=======================================\n                STEP3\n=======================================\n"
+	#rescoredDiagonals=rescoreDiagonals(blosum, betsTenDiagonals, hotspotRows)
+	diagonalRegionsDict=rescoreDiagonals(seq, seqRef, blosum, bestTenDiagonals)
+
+	if len(diagonalRegionsDict)>0:
+
+		#4. Join initial regions using gaps, penalise for gaps
+		print "\n=======================================\n                STEP4\n=======================================\n"
+				
+		mygraph=graph.createGraph(listAllRegions(diagonalRegionsDict))
+		if mygraph==None:
+			return "ERROR","ERROR", 0
+		
+		path=[]
+		value=0
+		allPaths=[]
+		for startNode in mygraph:
+			print "ooooooooooooooooooooooooooooooooooooooooo"
+			for node in mygraph[startNode]:
+				path, value=graph.findBestPath(mygraph, startNode, node[0])
+				print value,
+				if path:
+					allPaths.append([value,path])
+					for n in path:	
+						print n, "->",
+				print
+				
+		allPaths.sort(reverse=True)
+		bestPath=allPaths[0]
+		# 5. Perform dynamic programming to find final alignments
+		print "\n=======================================\n                STEP5\n=======================================\n"
+		#list all cells on the path starting with first diagonal run and ending with the last one from the path found before
+		print "path len=",len(bestPath)
+		rowColPath=findPathWithHoles(bestPath[1])
+		if rowColPath==None:
+			return "Error"
+	
 		print "Final path (before NW):"
 		print rowColPath
 
@@ -736,8 +744,12 @@ if len(diagonalRegionsDict)>0:
 		print seqAligned
 		print seqRefAligned
 		print score
-		printMatrix(matrix)
-
+		printMatrix(seq, seqRef, matrix)
+		
+		return seqAligned, seqRefAligned, score
+	
+	
+calcE(seq,seqRef)
 
 
 
