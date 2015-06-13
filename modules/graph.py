@@ -7,7 +7,7 @@ class DiagonalRun:
 		self.diag=diagonalNum
 		self.name=name
 	
-	def add(self, i,j, val=2):
+	def add(self, i,j, val=1):
 		if (i,j) not in self.hotspots:
 			self.hotspots.append((i,j))
 			self.value+=val
@@ -19,7 +19,7 @@ class DiagonalRun:
 		print "diag=", self.name, self.diag, ":", self.value, self.hotspots
 
 		
-def findShortestPath(graph, start, end, path=[], value=0):
+def findBestPath(graph, start, end, path=[], value=0):
 	path=path+ [start]
 	value+=start.value
 	if(start==end):
@@ -37,7 +37,7 @@ def findShortestPath(graph, start, end, path=[], value=0):
 					#print p.name,
 				#print value
 				#value+=node[1]
-				newPath, newValue=findShortestPath(graph, node[0], end, path, value)
+				newPath, newValue=findBestPath(graph, node[0], end, path, value)
 				newValue+=node[1]
 				if newPath:
 					if not bestPath or bestValue<newValue:
@@ -241,27 +241,13 @@ graph=createGraph(connections, subregions)
 printGraph(graph)
 print
 
-paths=[]
-#for startNode in graph:
-	#print "\t", startNode
-	#startNode.printIt()
-	#for node in graph:
-		#paths.append(findPath(graph, startNode, node))
-		
-paths2=findAllPaths(graph,connections[0][0], connections[4][1])
-for path in paths2:
-	for node in path:	
-		print node,
-	print
-
 path=[]
 value=0	
 when=1
 for startNode in graph:
 	print "ooooooooooooooooooooooooooooooooooooooooo"
 	for node in graph[startNode]:
-		print"\t____________________"
-		path, value=findShortestPath(graph, startNode, node[0])
+		path, value=findBestPath(graph, startNode, node[0])
 		print value,
 		if path:
 			for n in path:	
