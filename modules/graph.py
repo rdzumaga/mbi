@@ -69,9 +69,18 @@ def findAllPaths(graph, start, end, path=[]):
 		return paths
 	return []
 
-def createGraph(connections, subregions):
-	graph={}
+def createGraph(subregions):
 	
+	#find possible connections between regions
+	connections=[]
+	for v in subregions:
+		for u in subregions:
+			if u!=v:
+				dist=distanceBetween(v,u)
+				if(dist>0):
+					connections.append((v, u, -dist))
+	
+	graph={}
 	print"!!!!!!!!!!!!!CREATING GRAPH!!!!!!!!!!!!!!!!"
 	for con in connections:
 		start=con[0]
@@ -214,7 +223,7 @@ diag.add(8,15)
 diags.append(copy.copy(diag))
 diagDict[diagNum]=diag
 
-
+"""
 for d in diags:
 	d.printIt()
 
@@ -257,5 +266,5 @@ for startNode in graph:
 	print
 	if (when>100):
 		break
-	when+=1
+	when+=1"""
 		

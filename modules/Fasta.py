@@ -1,5 +1,6 @@
 import graph
 import copy
+import FastaSW
 seqRef1="GAATTC"
 seq1="GATTA"
 
@@ -655,19 +656,44 @@ diagonalRegionsDict=rescoreDiagonals(seq, seqRef, blosum, bestTenDiagonals)
 #4. Join initial regions using gaps, penalise for gaps
 print "\n=======================================\n                STEP4\n=======================================\n"
 
-#find possible connections between regions
-allRegions=listAllRegions(diagonalRegionsDict)
-connections=[]
-for v in allRegions:
-	for u in allRegions:
-		if u!=v:
-			dist=graph.distanceBetween(v,u)
-			if(dist>0):
-				connections.append((v, u, -dist))
-				
-				
-mygraph=graph.createGraph(connections, allRegions)
+def findPathBetween(startPos, destRegion):
+	path=[]
+	dest=destRegion.hotspots[0]
+	next=(startPos[0]+1, startPos[1]+1)
+	while(next[0]<dest[0] and next[1]< dest[1]):
+		path.append(next)
+		next=(next[0]+1, next[1]+1)
+	
+	if (next!=dest):
+		di=0
+		dj=0
+		if next[0]==dest[0]:
+			next=(next[0]-1, next[1])
+			dj=1		
+		elif next[1]==dest[1]:
+			next=(next[0], next[1]-1)
+			di=1
+			
+		while(next[0]!=dest[0] and next[1]!=dest[1]):
+			path.append(next)
+			next=(next[0]+di, next[1]+dj)
+	
+	return path
+			
+def findPathWithHoles(regionsPath):
+	startRegion=regionsPath[0]
+	path=startRegion.hotspots
+	for region in regionsPath[1:]:
+		path+=findPathBetween(path[-1], region)
+		path+=region.hotspots
+		
+	return path
+	
 
+			
+mygraph=graph.createGraph(listAllRegions(diagonalRegionsDict))
+path=[]
+value=0
 for startNode in mygraph:
 	print "ooooooooooooooooooooooooooooooooooooooooo"
 	for node in mygraph[startNode]:
@@ -679,6 +705,22 @@ for startNode in mygraph:
 		print
 		
 	
+# 5. Perform dynamic programming to find final alignments
+
+#list all cells on the path starting with first diagonal run and ending with the last one from the path found before
+rowColPath=findPathWithHoles(path)
+print "Final path (before NW):"
+print rowColPath
+
+matrix, seqAligned, seqRefAligned,score=FastaSW.SmithWaterman(seq, seqRef, rowColPath, k)
+
+
+print
+print seqAligned
+print seqRefAligned
+print score
+printMatrix(matrix)
+
 
 
 
