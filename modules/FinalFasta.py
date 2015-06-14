@@ -341,7 +341,7 @@ def fastaScoreAlignment(seq, seqRef, k, gapPenalty=-10, rescoreCutoff=10, matchR
 	diagonalDict=calcDiagonalSums(seq, seqRef, tuplesRef,tuplesRefDict, k)
 	if len(diagonalDict)==0:
 		print "step1 error"
-		return "Error: No common k-words of requested length found between these sequences"
+		return 0
 		
 	# 2 Score diagonals with k-word matches and identify 10 best diagonals
 	#save the 10 best local regions, regardless of whether they are on the same of different diagonals.
@@ -354,7 +354,7 @@ def fastaScoreAlignment(seq, seqRef, k, gapPenalty=-10, rescoreCutoff=10, matchR
 
 	if len(diagonalRegionsDict)==0:
 		print "Step 3 error"
-		return 0,0,0, "ERROR","ERROR"
+		return 0
 	
 	#4. Join initial regions using gaps (create a graph), penalise for gaps
 	#print "\n======================================="                STEP4\n=======================================\n"
@@ -362,7 +362,7 @@ def fastaScoreAlignment(seq, seqRef, k, gapPenalty=-10, rescoreCutoff=10, matchR
 	mygraph=graph.createGraph(listAllRegions(diagonalRegionsDict), -1)
 	if mygraph==None:
 		print "step4 error"
-		return 0,0,0, "ERROR","ERROR"
+		return 0
 		
 	path=[]
 	value=0
@@ -375,20 +375,13 @@ def fastaScoreAlignment(seq, seqRef, k, gapPenalty=-10, rescoreCutoff=10, matchR
 				
 	allPaths.sort(reverse=True)
 	init_n=allPaths[0]
-	
-	
-	# 5. Perform dynamic programming (Smith-Waterman)to find final alignments
-	
-	print "\n======================================="
-	print seqRef
-	print "======================================="
-	matrix, seqAligned, seqRefAligned,opt_score=FastaSW.SmithWaterman(seq, seqRef, init1.hotspots, k, gapPenalty)
-
-	print seqAligned
-	print seqRefAligned, 
-	print init1.value, init_n[0], opt_score
 		
-	return init1, init_n[0], opt_score, seqAligned, seqRefAligned
+	# 5. Perform dynamic programming (Smith-Waterman)to find final alignments
+
+	matrix, seqAligned, seqRefAligned,opt_score, alignedSeqRefStartIndex=FastaSW.SmithWaterman(seq, seqRef, init1.hotspots, k, gapPenalty)
+
+	
+	return init1, init_n[0], opt_score, seqAligned, seqRefAligned, alignedSeqRefStartIndex, len(seqRefAligned)
 	
 def readDb(fname):
 	lines = open(fname, "rt").readlines()
@@ -406,9 +399,12 @@ def fasta(seq, k=2, gapPenalty=-10, rescoreCutoff=10, matchReward=20, db=[], blo
 		blosum=readBlosum("blosum.txt")
 	
 	answer=[]
-	for ref in db:
-		init1, init_n, opt, seqAligned, seqRefAligned=fastaScoreAlignment(seq, ref, k, gapPenalty, rescoreCutoff, matchReward, blosum)
-		answer+=[init1, init_n, opt, seqAligned, seqRefAligned]
+	for i in range(len(db)):
+		init1, init_n, opt, seqAligned, seqRefAligned, refStartIndex, length=fastaScoreAlignment(seq, db[i], k, gapPenalty, rescoreCutoff, matchReward, blosum)
+		
 		astring, idents, gaps, mismatched=createAlignmentString(seqAligned, seqRefAligned)
-		print "len=", len(seqAligned), "idents=",idents, "gaps=", gaps, "mismatches=",mismatched
+		answer+=[init1, init_n, opt, i, refStartIndex, length, mismatched]
+		
+		
+	return answer
 	

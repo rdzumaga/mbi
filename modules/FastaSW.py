@@ -154,9 +154,10 @@ def traceback(scoreMatrix, startPos, seq, seqRef, penalty, match, mismatch):
     END, DIAG, UP, LEFT = range(4)
     alignedSeq = []
     alignedSeqRef = []
+	
     i, j         = startPos
-    #print "starPos=", startPos
-    step,newscore   = nextStep(scoreMatrix, i, j, seq, seqRef, penalty, match, mismatch,score)
+
+    step,newscore   = nextStep(scoreMatrix, i, j, seq, seqRef, penalty, match, mismatch,score )
 
     while step != END:
         #print (i,j), "score=", score
@@ -176,11 +177,11 @@ def traceback(scoreMatrix, startPos, seq, seqRef, penalty, match, mismatch):
         
         step,score = nextStep(scoreMatrix, i, j, seq, seqRef, penalty, match, mismatch,newscore)
 		
+	alignedSeqRefStartIndex=j
+    return ''.join(reversed(alignedSeq)), ''.join(reversed(alignedSeqRef)), score, alignedSeqRefStartIndex
 
-    return ''.join(reversed(alignedSeq)), ''.join(reversed(alignedSeqRef)), score
 
-
-def nextStep(scoreMatrix, i, j, seq, seqRef, penalty, match, mismatch,score):
+def nextStep(scoreMatrix, i, j, seq, seqRef, penalty, match, mismatch,score ):
     if(i==0 or j==0):
         return 0, score
 	
@@ -189,8 +190,9 @@ def nextStep(scoreMatrix, i, j, seq, seqRef, penalty, match, mismatch,score):
     up   = scoreMatrix[i - 1][j]
     left = scoreMatrix[i][j - 1]
 
+	
     similarity=match if seq[i-1]==seqRef[j-1] else mismatch
-
+		
     if(val==diag+similarity):
         return 1, score+scoreMatrix[i][j]
     if (val==up+penalty):
@@ -314,63 +316,9 @@ def SmithWaterman(seq, seqRef, path, k, penalty=-5, match=1, mismatch=-1):
 
     # Traceback. Find the optimal path through the scoring matrix. This path
     # corresponds to the optimal local sequence alignment.
-    seqAligned, seqRefAligned, score = traceback(matrix, bestPos, seq, seqRef, penalty, match, mismatch)
+    seqAligned, seqRefAligned, score, alignedSeqRefStartIndex = traceback(matrix, bestPos, seq, seqRef, penalty, match, mismatch)
     assert len(seqAligned) == len(seqRefAligned), 'aligned strings are not the same size'
-    return matrix, seqAligned, seqRefAligned,score
+    return matrix, seqAligned, seqRefAligned,score, alignedSeqRefStartIndex
 
 
-
-
-
-""""
-#------------------------------------
-try:
-    t=1
-    #parse_cmd_line()
-except ValueError as err:
-    print('error:', err)
-
-
-# The scoring matrix contains an extra row and column for the gap (-), hence
-# the +1 here.
-rows = len(seq) + 1
-cols = len(seqRef) + 1
-
-# Initialize the scoring matrix.
-scoreMatrix, bestPos = createScoreMatrix(rows, cols)
-print "----------------------------------------"
-print_matrix(scoreMatrix)
-
-# Traceback. Find the optimal path through the scoring matrix. This path
-# corresponds to the optimal local sequence alignment.
-seqAligned, seqRefAligned = traceback(scoreMatrix, bestPos)
-assert len(seqAligned) == len(seqRefAligned), 'aligned strings are not the same size'
-
-# Pretty print the results. The printing follows the format of BLAST results
-# as closely as possible.
-alignmentStr, idents, gaps, mismatches = createAlignmentString(seqAligned, seqRefAligned)
-alength = len(seqAligned)
-
-
-print "***************stats**************"
-print "seq=", seq, "rows=len(seq), seq is vertical and string in"
-print "seqRef=", seqRef,"cols=len(seqRef), seqRef is horizontal and string ref"
-print "seqAligned=",seqAligned
-print "seqRefAligned=",seqRefAligned
-print "*********************************"
-
-print
-print(' Identities = {0}/{1} ({2:.1%}), Gaps = {3}/{4} ({5:.1%})'.format(idents,
-      alength, idents / alength, gaps, alength, gaps / alength))
-print
-for i in range(0, alength, 60):
-    seqSlice = seqAligned[i:i+60]
-    print('Query      {0:<4}  {1}  {2:<4}'.format(i + 1, seqSlice, i + len(seqSlice)))
-    print('                 {0}'.format(alignmentStr[i:i+60]))
-    seqRefAlignedSlice = seqRefAligned[i:i+60]
-    print('Reference  {0:<4}  {1}  {2:<4}'.format(i + 1, seqRefAlignedSlice, i + len(seqRefAlignedSlice)))
-    print()
-
-strG = str(raw_input("Genome sequence: "))
-"""
 
