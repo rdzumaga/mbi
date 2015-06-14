@@ -36,7 +36,7 @@ def algorithm():
     if form.accepts(request.vars, session, keepvalues=True):
         penalty=int(request.vars.break_penalty)
         iterx=int(request.vars.iters)
-        d=NW.needlemanWunsch(iterx, request.vars.seqA,request.vars.seqB, penalty)
+        d=NW.needlemanWunsch(iterx, request.vars.seqA,request.vars.seqB, penalty, "applications/mbi/modules/blosum.txt")
 
 
     return dict(form=form, d=d)
@@ -75,6 +75,12 @@ def smithWaterman():
                 print d[0]
 
             return dict(form=form, d=d)
+
+
+def fasta():
+
+
+    return dict()
 
 
 
