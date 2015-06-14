@@ -1,4 +1,5 @@
 {{extend 'layout.html'}}
+{{wynik=d}}
 <script src="{{=URL('static','js/smithWaterman.js')}}"></script>
 
 <div class="container-fluid">
@@ -18,7 +19,9 @@
 
 
 </br>
-    <label class="col-sm-2 control-label">Macierz podobieństwa:</label>
+
+		{{if len(wynik) > 0:}}
+		    <label class="col-sm-2 control-label">Macierz podobieństwa:</label>
         </br></br>
 <table class="similarityMatrix table table-bordered table-condensed table-hover table-striped" >
     <thead style="text-align:center;">
@@ -31,41 +34,30 @@
         </tr>
     </thead>
     <tbody>
-        <tr>
-            <th>A</th>
-            <td>10</td>
-            <td>-1</td>
-            <td>-3</td>
-            <td>-4</td>
-        </tr>
-        <tr>
-            <th>G</th>
-            <td>-1</td>
-            <td>7</td>
-            <td>-5</td>
-            <td>-3</td>
-        </tr>
-        <tr>
-            <th>C</th>
-            <td>-3</td>
-            <td>-5</td>
-            <td>9</td>
-            <td>0</td>
-        </tr>
-        <tr>
-            <th>T</th>
-            <td>-4</td>
-            <td>-3</td>
-            <td>0</td>
-            <td>8</td>
-        </tr>
+		{{smalliter = 1}}
+	    {{iterMatrix = "AGCT"}}
+		{{for letter in iterMatrix:}}
+		<tr>
+			<th>{{=letter}}</th>
+				{{for _helper in iterMatrix:}}
+				{{if letter==_helper:}}
+				<td>{{=request.vars.match}}</td>
+				{{else:}}
+				<td>{{=request.vars.mismatch}}</td>
+				{{pass}}
+			{{pass}}
+		</tr>
+		{{pass}}
     </tbody>
 </table>
+		
+		{{pass}}
+
 <div id="buttonPlace" class="col-md-offset-2"></div>
 
 
         </div>
-		{{wynik=d}}
+		
 
 		
         {{if len(wynik) == 3 and request.vars.iters != '3':}}
