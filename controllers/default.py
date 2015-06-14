@@ -10,7 +10,7 @@
 
 import NW
 import SW
-import Fasta
+import FinalFasta
 
 def algorithm():
 
@@ -83,7 +83,7 @@ def fasta():
 
     d = ""
 
-    db=Fasta.readDb("applications/mbi/modules/db.txt")
+    db=FinalFasta.readDb("applications/mbi/modules/db.txt")
 
     form=FORM(DIV(LABEL('Sekwencja :', _for="seq", _class='col-sm-2 control-label'), DIV(INPUT(_id='seq', _name='seq', _type='text', _style='text-transform: uppercase', _class='form-control', _placeholder = 'np. AAGCT'), _class='col-md-4'), _class='form-group', _id='seqDiv'),
 
@@ -108,8 +108,7 @@ def fasta():
 
     if form.accepts(request.vars, session, keepvalues=True):
         penalty=int(request.vars.break_penalty)
-        print request.vars.seq
-        d=Fasta.fasta(request.vars.seq)
+        d=FinalFasta.fasta(request.vars.seq)
 
 
     return dict(form=form, d=d, db=db)
