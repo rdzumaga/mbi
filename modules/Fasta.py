@@ -21,24 +21,24 @@ seq="GCCTTGTAA"
 #ktup lenght; should be 4,5 or 6 for DNA, preferably 6
 k=2
 # some value to filter out diagonals with lowest scores (below cutoff means low score)
-cutoff=10 
+cutoff=10
 
 
 
 def getTuplesList(str):
 	tuples=set()
 	tuplesDict={}
-	
+
 	for i in range(0, len(str)-k+1):
 		tuple=str[i:i+k]
-		
+
 		if tuple not in tuples:
 			tuples.add(tuple)
 			tuplesDict[tuple]=[]
-			
+
 		tuplesDict[tuple].append(i)
 	return tuples,tuplesDict
-	
+
 def createDiagonalDict0():
 	#TODO: verify that
 	#diagonalNum=rows+cols-2*k+1
@@ -49,27 +49,27 @@ def createDiagonalDict0():
 	for col in range(1, cols-k+1):
 		diagonalIndexDict[-col]=0
 	return diagonalIndexDict
-	
+
 def createDiagonalDict(seq, seqRef):
 	#TODO: verify that
 	#diagonalNum=rows+cols-2*k+1
-	
+
 	rows=len(seq)
 	cols=len(seqRef)
 	diagonalIndexDict={}
-	
+
 	for row in range(0, rows-k+1):
 		diagonalIndexDict[row]=[graph.DiagonalRun(row, str(row))]
 	for col in range(1, cols-k+1):
 		diagonalIndexDict[-col]=[graph.DiagonalRun(-col, str(-col))]
 	return diagonalIndexDict
-	
+
 def createDiagonalDictFrom(bestDiagonals):
 	newDict=dict(bestDiagonals)
 	for diag in bestDiagonals:
-		newDict[diag]=0 
-	return newDict	
-	
+		newDict[diag]=0
+	return newDict
+
 def createHotspotsDict():
 	#TODO: verify that
 	#diagonalNum=rows+cols-2*k+1
@@ -84,7 +84,7 @@ def initDiagonals(seq, seqRef):
 	diags=[]
 	rows=len(seq)
 	cols=len(seqRef)
-	
+
 	for row in range(0, rows-k+1):
 		diagonal=[graph.DiagonalRun(row, str(row)+".0")]
 		diags.append(diagonal)
@@ -92,31 +92,31 @@ def initDiagonals(seq, seqRef):
 		diagonal=[graph.DiagonalRun(-col, str(row)+".0")]
 		diags.append(diagonal)
 	return diags
-	
+
 def calcDiagonalSums0(tuplesRef, tuplesRefDict):
 	diagonalSums=createDiagonalDict()
 	hotspotRows=createHotspotsDict()
 	#scoreMatrix=[[0 for col in range(cols)] for row in range(rows)]
 
 	for row in range(0, rows-k+1):
-		tuple=seq[row:row+k]	
-		if tuple in tuplesRef:			
+		tuple=seq[row:row+k]
+		if tuple in tuplesRef:
 			for col in tuplesRefDict[tuple]:
 				offset=row-col
 
 				diagonalSums[offset]+=1
 				hotspotRows[offset].append(row)
-	
+
 	#get rid of entries with sum==0
 	answer=dict(diagonalSums)
 	for diag in diagonalSums:
 		if diagonalSums[diag]==0:
 			del answer[diag]
 			del hotspotRows[diag]
-	
+
 	print"-------------------"
 	print "diagonalSums="
-	print answer	
+	print answer
 	print "-------------------"
 	print "hotspotRows"
 	print hotspotRows
@@ -124,19 +124,19 @@ def calcDiagonalSums0(tuplesRef, tuplesRefDict):
 	print "tuplesRefDict (hotspotCols):"
 	print tuplesRefDict
 	return answer, hotspotRows
-	
+
 def calcDiagonalSums(seq, seqRef,tuplesRef, tuplesRefDict):
 	#diagonalSums=createDiagonalDict0()
 	diagonalDict=createDiagonalDict(seq, seqRef)
-	
+
 	#hotspotRows=createHotspotsDict()
 	#scoreMatrix=[[0 for col in range(cols)] for row in range(rows)]
 	rows=len(seq)
 	cols=len(seqRef)
-	
+
 	for row in range(0, rows-k+1):
-		tuple=seq[row:row+k]	
-		if tuple in tuplesRef:			
+		tuple=seq[row:row+k]
+		if tuple in tuplesRef:
 			for col in tuplesRefDict[tuple]:
 				offset=row-col
 				diagonalDict[offset][0].add(row, col)
@@ -146,7 +146,7 @@ def calcDiagonalSums(seq, seqRef,tuplesRef, tuplesRefDict):
 	for diag in diagonalDict:
 		if diagonalDict[diag][0].value==0:
 			del goodDiagonalDict[diag]
-			
+
 	return goodDiagonalDict
 
 def scoreDiagonals0(diagonalSumDict, hotspotRows):
@@ -163,43 +163,43 @@ def scoreDiagonals0(diagonalSumDict, hotspotRows):
 
 	for diag in diagonalSumDict:
 		print "diag=",diag
-		
-		firstRow=0 if diag<=0 else diag	
+
+		firstRow=0 if diag<=0 else diag
 		gapPenalty=-reward/2 #this should be some kind of negative value
 		interspotPenaltySum=0
 		sum=0
-		
+
 		#for each row, score the cell and update diagonalSums
 		for row in range(firstRow,rows-k+1):
 			col=row-diag
-			
+
 			# check if col within boundaries
 			if(col<cols):
 				hotspot=row in hotspotRows[diag]
-				
-				#if for this col there is a gap between two hotspots: 
+
+				#if for this col there is a gap between two hotspots:
 				#(sum>0 indicates at least 1 hotspot was found before)
 				if(hotspot==False and sum>0):
 					#sum penalties for each consecutive gap
 					interspotPenaltySum+=gapPenalty
-					
+
 					#make sure penalty stays a negativ value (in case there were too many consecutive gaps)
 					if(gapPenalty<0):
 						#each consecutive gap has less of a penalty
 						gapPenalty+=1
-										
+
 				elif hotspot:
 					#sum the reward and add the penalty for the gaps between this hotspot and the previous one
 					sum=sum+reward+interspotPenaltySum
-					
+
 					#since a hotspot was found, reset the interspotPenaltySum and revert to the initial gapPenalty value
 					interspotPenaltySum=0
 					gapPenalty=-reward/2
 				#print "row=", row, "sum=", sum, "gapPenalty=", interspotPenaltySum
-		
+
 		rescoredDiagonals[diag]=sum
 		sum=0
-	
+
 	if(len(rescoredDiagonals)>10):
 		rescoredDiagonals=getTopDiagonals(getTopDiagonals)
 	return rescoredDiagonals
@@ -217,7 +217,7 @@ def scoreDiagonals(diagonalDict, seq, seqRef):
 	cols=len(seqRef)
 	rescoredDiagonals=dict(diagonalDict)
 	reward=20 #this should be some kind of positive value
-	
+
 	#group all consecutive hotspots into regions
 	for diag in diagonalDict:
 		regionNr=1
@@ -232,86 +232,86 @@ def scoreDiagonals(diagonalDict, seq, seqRef):
 					regionNr+=1
 					region=graph.DiagonalRun(diag,str(diag)+"."+str(regionNr))
 					regionNr+=1
-						
-			region.add(hspots[i][0], hspots[i][1])	
+
+			region.add(hspots[i][0], hspots[i][1])
 		rescoredDiagonals[diag].append(copy.copy(region))
 
-			
+
 	#TODO check if regions would have a better score when combined with others, inspite of gaps
-		
-		""""firstRow=0 if diag<=0 else diag	
+
+		""""firstRow=0 if diag<=0 else diag
 		gapPenalty=-reward/2 #this should be some kind of negative value
 		interspotPenaltySum=0
 		sum=0
-		
+
 		#for each row, score the cell and update diagonalSums
 		for row in range(firstRow,rows-k+1):
 			regionNr=1
 			col=row-diag
 			newDiagRun=graph.DiagonalRun(diag, str(diag)+"."+str(regionNr))
-			
+
 			# check if col within boundaries
 			if(col<cols):
 				hotspot=row in diagonalDict[diag][0].hotspots
-				
-				#if for this col there is a gap between two hotspots: 
+
+				#if for this col there is a gap between two hotspots:
 				#(sum>0 indicates at least 1 hotspot was found before)
 				if(hotspot==False and sum>0):
 					recoredDiagonals[diag][0]=copy.copy(newDiagRun)
 					newDiagRun.hotspot.append(row,col)
 					#sum penalties for each consecutive gap
 					interspotPenaltySum+=gapPenalty
-					
+
 					#make sure penalty stays a negativ value (in case there were too many consecutive gaps)
 					if(gapPenalty<0):
 						#each consecutive gap has less of a penalty
 						gapPenalty+=1
-										
+
 				elif hotspot:
 					#sum the reward and add the penalty for the gaps between this hotspot and the previous one
 					newDiagRun.value=newDiagRun.value+reward+interspotPenaltySum
 					newDiagRun.hotspots.append(row,col)
-					
+
 					sumWithGaps=sum+reward+interspotPenaltySum
 					if(sumWithGaps>sum):
 						sum=sumWithGaps
 					sum=sum+reward+interspotPenaltySum
-					
+
 					#since a hotspot was found, reset the interspotPenaltySum and revert to the initial gapPenalty value
 					interspotPenaltySum=0
 					gapPenalty=-reward/2
 				#print "row=", row, "sum=", sum, "gapPenalty=", interspotPenaltySum
-			
+
 			regionNr+=1
 		rescoredDiagonals[diag][0].value=sum
 		sum=0"""
-	
+
 	if(len(rescoredDiagonals)>10):
 		rescoredDiagonals=getTopDiagonals(rescoredDiagonals)
 	return rescoredDiagonals
-	
-def getTopDiagonals(diagonals):	
+
+def getTopDiagonals(diagonals):
 	regions=listAllRegions(diagonals)
-	
+
 	#get updated diagonals dictionary
 	bestDiagonals=dict(diagonals)
-	
-	#get keys for the top ten diagonal sums	sort(key=lambda x: x.count, reverse=True)		
-	regions.sort(key=lambda x: x.value, reverse=True)	
+
+	#get keys for the top ten diagonal sums	sort(key=lambda x: x.count, reverse=True)
+	regions.sort(key=lambda x: x.value, reverse=True)
 	topRegions=regions[0:11]
-	
+
 	for diagNum in diagonals:
 		for region in diagonals[diagNum]:
 			if region not in topRegions:
 				bestDiagonals[diagNum].remove(region)
-		
+
 
 	return bestDiagonals
 
 def rescoreDiagonals0(blosum,bestDiagonals,hotspotRows):
 
 	rescoredDiagonals=createDiagonalDictFrom(bestDiagonals)
-	print rescoredDiagonals			
+	print rescoredDiagonals
 	#iterate over diagonals and score the with blosum matrix
 	for diag in bestDiagonals:
 		for row in hotspotRows[diag]:
@@ -319,23 +319,23 @@ def rescoreDiagonals0(blosum,bestDiagonals,hotspotRows):
 			print "row=", row, "col=", col, "diag=", diag
 			#print "blosum(seq[", row,"], seqRef[", col,"]= blosum[", seq[row], seq[col],"]"
 			rescoredDiagonals[diag]+=blosum[(seq[row], seqRef[col])]
-		
-	
+
+
 	#remove diagonals with scores below a cutoff threshold
 	bestRescoredDiagonals=dict(rescoredDiagonals)
-	
+
 	print rescoredDiagonals
-	
+
 	for diag in rescoredDiagonals:
 		if rescoredDiagonals[diag]<cutoff:
 			del bestRescoredDiagonals[diag]
-			
+
 	print
 	print bestRescoredDiagonals
 	return bestRescoredDiagonals
 
 def rescoreDiagonals(seq, seqRef, blosum, bestDiagonals):
-	rescoredDiagonals=createDiagonalDictFrom(bestDiagonals)	
+	rescoredDiagonals=createDiagonalDictFrom(bestDiagonals)
 	#iterate over diagonals and score the with blosum matrix
 	for diag in bestDiagonals:
 		rescoredRegions=[]
@@ -350,14 +350,14 @@ def rescoreDiagonals(seq, seqRef, blosum, bestDiagonals):
 	#print
 	#remove diagonals with scores below a cutoff threshold
 	bestRescoredDiagonals=dict(rescoredDiagonals)
-	
+
 	#for diag in bestRescoredDiagonals:
-		#print diag, 
+		#print diag,
 		#for reg in bestRescoredDiagonals[diag]:
 			#print reg.hotspots, reg.value,
 		#print
 
-	
+
 	for diag in bestDiagonals:
 		for region in bestDiagonals[diag]:
 			if region.value<cutoff:
@@ -365,24 +365,24 @@ def rescoreDiagonals(seq, seqRef, blosum, bestDiagonals):
 					bestRescoredDiagonals[diag].remove(region)
 				else:
 					del bestRescoredDiagonals[diag]
-			
+
 	#print "AFTER cutoff"
 	#for diag in bestRescoredDiagonals:
-		#print diag, 
+		#print diag,
 		#for reg in bestRescoredDiagonals[diag]:
 			#print reg.hotspots, reg.value,
 		#print
 	return bestRescoredDiagonals
-	
+
 def listAllRegions(diagonalRegionsDict):
 	regions=[]
 	for diag in diagonalRegionsDict:
-		#diagonalRegionsDict[diag].printIt() 
+		#diagonalRegionsDict[diag].printIt()
 		for region in diagonalRegionsDict[diag]:
 			regions.append(region)
 	print
 	return regions
-	
+
 def createMatrixForDots0(diagonalSumDict, hotspotRows):
 	"""
 	just for debugging. drawing dot matrix is unnecessary since it takes too much memory to remember all values
@@ -398,8 +398,8 @@ def createMatrixForDots0(diagonalSumDict, hotspotRows):
 					scoreMatrix[row][col]=1
 				else:
 					scoreMatrix[row][col]=0
-	return scoreMatrix	
-	
+	return scoreMatrix
+
 def createMatrixForDots(diagonalDict, seq, seqRef):
 	"""
 	just for debugging. drawing dot matrix is unnecessary since it takes too much memory to remember all values
@@ -407,7 +407,7 @@ def createMatrixForDots(diagonalDict, seq, seqRef):
 	rows=len(seq)
 	cols=len(seqRef)
 	scoreMatrix=[[0 for col in range(cols)] for row in range(rows)]
-	
+
 	for diag in diagonalDict:
 		firstRow=0 if diag<=0 else diag
 		for row in range(firstRow,rows-k+1):
@@ -444,10 +444,10 @@ def findRegions(diag, scoreMatrix):
 				sum=0
 				regionRows[:]=[]
 			print "col=",col, "val=",scoreMatrix[row][col],"sum=",sum
-		
 
-	return sorted(regions, key=lambda tup: tup[0], reverse=True)	
-		
+
+	return sorted(regions, key=lambda tup: tup[0], reverse=True)
+
 # Create an empty matrix
 def create_matrix(m, n):
     return [[0]*n for _ in xrange(m)]
@@ -482,7 +482,7 @@ def print_matrix(matrix):
         for col in row:
             print('{0:>4}'.format(col)),
         print
-		
+
 def printDotMatrix(seq, seqRef, matrix):
 	#print ref sequence's nukleotides
 	rows=len(seq)
@@ -490,7 +490,7 @@ def printDotMatrix(seq, seqRef, matrix):
 	print
 	print" ",
 	for n in range(cols):
-		print seqRef[n], 
+		print seqRef[n],
 	print
 	#print sequence's nukleotides and "o" if a dot should be printed
 	for i in range(0,rows):
@@ -531,23 +531,23 @@ def findPathBetween(startPos, destRegion):
 		while(next[0]<dest[0] and next[1]< dest[1]):
 			path.append(next)
 			next=(next[0]+1, next[1]+1)
-		
+
 		if (next!=dest):
 			di=0
 			dj=0
 			if next[0]==dest[0]:
 				next=(next[0]-1, next[1])
-				dj=1		
+				dj=1
 			elif next[1]==dest[1]:
 				next=(next[0], next[1]-1)
 				di=1
-				
+
 			while(next[0]!=dest[0] and next[1]!=dest[1]):
 				path.append(next)
 				next=(next[0]+di, next[1]+dj)
-		
+
 		return path
-				
+
 def findPathWithHoles(regionsPath):
 
 	if len(regionsPath)==0:
@@ -557,21 +557,21 @@ def findPathWithHoles(regionsPath):
 	for region in regionsPath[1:]:
 		path+=findPathBetween(path[-1], region)
 		path+=region.hotspots
-		
-	return path	
-		
+
+	return path
+
 def calcE(seq, seqRef,blosum="", k=2):
 	if len(blosum)==0:
 		blosum=readBlosum("blosum.txt")
-		
+
 	rows=len(seq)
 	cols=len(seqRef)
-	
+
 	# 1.identify common k-words between I (seq) and J(seqRef)
 	#print "\n=======================================\n                STEP1\n=======================================\n"
 	tuplesRef,tuplesRefDict=getTuplesList(seqRef)
 	diagonalDict=calcDiagonalSums(seq, seqRef, tuplesRef,tuplesRefDict)
-	
+
 	matrix=createMatrixForDots(diagonalDict,seq, seqRef)#
 	#printDotMatrix(seq, seqRef, matrix)#
 
@@ -589,11 +589,11 @@ def calcE(seq, seqRef,blosum="", k=2):
 
 		#4. Join initial regions using gaps, penalise for gaps
 		#print "\n=======================================\n                STEP4\n=======================================\n"
-				
+
 		mygraph=graph.createGraph(listAllRegions(diagonalRegionsDict))
 		if mygraph==None:
 			return "ERROR","ERROR", 0
-		
+
 		path=[]
 		value=0
 		allPaths=[]
@@ -604,10 +604,10 @@ def calcE(seq, seqRef,blosum="", k=2):
 				#print value,
 				if path:
 					allPaths.append([value,path])
-					#for n in path:	
+					#for n in path:
 						#print n, "->",
 				#print
-				
+
 		allPaths.sort(reverse=True)
 		bestPath=allPaths[0]
 		# 5. Perform dynamic programming to find final alignments
@@ -616,7 +616,7 @@ def calcE(seq, seqRef,blosum="", k=2):
 		rowColPath=findPathWithHoles(bestPath[1])
 		if rowColPath==None:
 			return "ERROR","ERROR", 0
-	
+
 		#print "Final path (before NW):"
 		#print rowColPath
 
@@ -628,7 +628,7 @@ def calcE(seq, seqRef,blosum="", k=2):
 		print seqRefAligned
 		print score
 		#printMatrix(seq, seqRef, matrix)
-		
+
 		return seqAligned, seqRefAligned, score
 
 def readDb(fname):
@@ -637,34 +637,34 @@ def readDb(fname):
 	for line in lines:
 		#get rid of CRLF
 		db.append(line[:-1])
-		break
+		#break
 	return db
-	
+
 def fasta(seq, k=2, db=[], blosum={} ):
 	if len(db)==0:
-		db=readDb("applications/mbi/modules/dbMini.txt")
-	
+		db=readDb("applications/mbi/modules/db.txt")
+
 	if len(blosum)==0:
 		blosum=readBlosum("applications/mbi/modules/blosum.txt")
-	
+
 	answer=[]
 	for ref in db:
 		seqAligned, seqRefAligned, score=calcE(seq, ref, blosum, k)
 		answer+=[seqAligned, seqRefAligned, score]
 
 	return answer
-	
-	
+
+
 
 """
 seq="ACTTGATAGCCGATTAGGAC"
-seqRef="ATTGATTTAGTATATTATTAAATGTATATATTAATTCAATATTATTATTCTATTCATTTTTATTCATTTT"	
+seqRef="ATTGATTTAGTATATTATTAAATGTATATATTAATTCAATATTATTATTCTATTCATTTTTATTCATTTT"
 calcE(seq,seqRef)
 
-seqRef="CAAATTTATAATATATTAATCTATATATTAATTTAGAATTCTATTCTAATTCGAATTCAATTTTTAAATA"	
+seqRef="CAAATTTATAATATATTAATCTATATATTAATTTAGAATTCTATTCTAATTCGAATTCAATTTTTAAATA"
 calcE(seq,seqRef)
 
-seqRef="TTCATATTCAATTAAAATTGAAATTTTTTCATTCGCGAGGAGCCGGATGAGAAGAAACTCTCATGTCCGG"	
+seqRef="TTCATATTCAATTAAAATTGAAATTTTTTCATTCGCGAGGAGCCGGATGAGAAGAAACTCTCATGTCCGG"
 calcE(seq,seqRef)"""
 
 
@@ -688,15 +688,15 @@ diagonalSums, scoreMatrix=calcDiagonalSums()
 
 #print dot mattrix
 printDotMatrix(scoreMatrix)
-	
+
 print
 printMatrix(scoreMatrix)
-	
+
 print "diagonal sums:\n"
 print diagonalSums
 
-	
-# 2b. identify 10 best diagonals	
+
+# 2b. identify 10 best diagonals
 filteredScoreMatrix,bestDiagonals=matrixWithTopDiagonals(diagonalSums, scoreMatrix)
 
 
@@ -713,11 +713,11 @@ print
 # 5. Perform dynamic programming to find final alignments
 
 	"""
-	
-	
-	
-	
-	
+
+
+
+
+
 """
 	The stages in the FASTA algorithm are as follows:
 1. We specify an integer parameter called ktup (short for k respective tuples), and we look
