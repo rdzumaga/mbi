@@ -637,11 +637,12 @@ def readDb(fname):
 	for line in lines:
 		#get rid of CRLF
 		db.append(line[:-1])
+		break
 	return db
 	
 def fasta(seq, k=2, db=[], blosum={} ):
 	if len(db)==0:
-		db=readDb("applications/mbi/modules/db.txt")
+		db=readDb("applications/mbi/modules/dbMini.txt")
 	
 	if len(blosum)==0:
 		blosum=readBlosum("applications/mbi/modules/blosum.txt")
@@ -650,6 +651,8 @@ def fasta(seq, k=2, db=[], blosum={} ):
 	for ref in db:
 		seqAligned, seqRefAligned, score=calcE(seq, ref, blosum, k)
 		answer+=[seqAligned, seqRefAligned, score]
+
+	return answer
 	
 	
 
