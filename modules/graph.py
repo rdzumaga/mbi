@@ -18,12 +18,23 @@ class DiagonalRun:
 	def printIt(self):
 		print "diag=", self.name, self.diag, ":", self.value, self.hotspots
 
+        def __gt__(self, other):
+                return self.value > other.value
+		
+        def __lt__(self, other):
+                return self.value < other.value
+		
+        def __ge__(self, other):
+                return self.value >= other.value
+		
+        def __le__(self, other):
+                return self.value <= other.value	
+		
 		
 def findBestPath(graph, start, end, path=[], value=0):
 	path=path+ [start]
 	value+=start.value
 	if(start==end):
-		#print "START=END"
 		return path, value
 		
 	if(start in graph):
@@ -32,19 +43,15 @@ def findBestPath(graph, start, end, path=[], value=0):
 		best=None
 		for node in graph[start]:
 			if node not in path:
-				#print "Looking for", start ,"->", end,
-				#for p in path:
-					#print p.name,
-				#print value
-				#value+=node[1]
+
 				newPath, newValue=findBestPath(graph, node[0], end, path, value)
-				newValue+=node[1]
+				edgeWeight=node[1]
+				value+=edgeWeight
 				if newPath:
-					if not bestPath or bestValue<newValue:
+					if not bestPath or bestValue<value:
 						best=newPath
 						bestValue=newValue
 				
-		#print "DOWN_RETURN"
 		return best, bestValue
 	return None, 0
 
@@ -68,21 +75,22 @@ def findAllPaths(graph, start, end, path=[]):
 		return paths
 	return []
 
-def createGraph(subregions):
+def createGraph(subregions, gapPenalty):
 	#find possible connections between regions
 	connections=[]
 	for v in subregions:
 		for u in subregions:
 			if u!=v:
-				dist=distanceBetween(v,u)
+				dist=distanceBetween(v,u,gapPenalty)
+
 				if(dist>0):
 					connections.append((v, u, -dist))
 	
 	graph={}
-	
+
 	if len(connections)==0:
 		return None
-		
+	
 	for con in connections:
 		start=con[0]
 		graph[start]=[]
@@ -95,7 +103,7 @@ def createGraph(subregions):
 	return graph
 		
 
-def distanceBetween(v, u):
+def distanceBetween(v, u, gapPenalty):
 	
 	v_lastRow=v.hotspots[len(v.hotspots)-1][0]
 	v_lastCol=v.hotspots[len(v.hotspots)-1][1]
@@ -108,15 +116,8 @@ def distanceBetween(v, u):
 	
 	if row_dist<0 or col_dist<0:
 		return -1
-	
-	#print"--------Comparing distance between-------------"
-	#v.printIt()
-	#u.printIt()
-	#print 
-	#print "row, col V:", v_lastRow, v_lastCol, "row, col U:", u_firstRow, u_firstCol
-	#print "dist:", row_dist, col_dist
-	#print "------------------------------------------------!"
-	return max(row_dist, col_dist)
+
+	return (max(row_dist, col_dist))*-gapPenalty
 	
 def printGraph(graph):
 	print "graph={"
@@ -128,7 +129,7 @@ def printGraph(graph):
 			print (destNode, cost),
 		print "]"
 		
-print "----------GRAPHS_-------------"
+
 
 #create sample verices for graph
 diagDict={}

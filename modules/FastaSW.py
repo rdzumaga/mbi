@@ -305,10 +305,8 @@ def printMatrix(matrix,seq, seqRef):
                # print "    ",
         print
 
-#-4,5, -3
-seq02= "CGTGAATTCAT" #horizontal
-seq01 = "GACTTAC"#vertical
-def SmithWaterman(seq, seqRef, path, k, penalty=-4, match=5, mismatch=-3):
+
+def SmithWaterman(seq, seqRef, path, k, penalty=-5, match=1, mismatch=-1):
     rows=len(seq)+1
     cols=len(seqRef)+1
   
