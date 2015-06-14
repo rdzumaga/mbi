@@ -253,6 +253,7 @@ def rescoreDiagonals(seq, seqRef, blosum, bestDiagonalsDict,k, cutoff):
 
 	
 	rescoredRegions=listAllRegions(bestRescoredDiagonals)
+	print "len=", len(bestRescoredDiagonals)
 	init1=max(rescoredRegions)
 
 	return bestRescoredDiagonals, init1
@@ -381,7 +382,7 @@ def fastaScoreAlignment(seq, seqRef, k, gapPenalty=-10, rescoreCutoff=10, matchR
 	matrix, seqAligned, seqRefAligned,opt_score, alignedSeqRefStartIndex=FastaSW.SmithWaterman(seq, seqRef, init1.hotspots, k, gapPenalty)
 
 	
-	return init1, init_n[0], opt_score, seqAligned, seqRefAligned, alignedSeqRefStartIndex, len(seqRefAligned)
+	return init1.value, init_n[0], opt_score, seqAligned, seqRefAligned, alignedSeqRefStartIndex, len(seqRefAligned)
 	
 def readDb(fname):
 	lines = open(fname, "rt").readlines()
@@ -408,3 +409,6 @@ def fasta(seq, k=2, gapPenalty=-10, rescoreCutoff=10, matchReward=20, db=[], blo
 		
 	return answer
 	
+seq2="ACTTGATAGCCGATTAGGAC"
+seq="ACTG"
+fasta(seq, 2)
