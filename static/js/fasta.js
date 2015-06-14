@@ -8,7 +8,7 @@ function addButton() {
     btn.onclick = function () {
          document.getElementById("seq").value = document.getElementById("seq").value.toUpperCase();
         if (sequenceValidation()) {
-,            document.getElementById("myForm").submit();
+            document.getElementById("myForm").submit();
         }
     };
 }
