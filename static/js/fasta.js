@@ -19,7 +19,7 @@ function sequenceValidation() {
     var seq = document.getElementById("seq");
     var seqLength = document.getElementById("length");
     var thrC = document.getElementById("threshold_c");
-    var thrT = document.getElementById("threshold_t");    
+    var match = document.getElementById("match");    
     var penalty = document.getElementById("break_penalty");
     
     var ok = true;
@@ -45,7 +45,7 @@ function sequenceValidation() {
     else {
         removeWarning('C');
     }    
-    if (isNaN(thrT.value) || parseInt(Number(thrT.value)) != thrT.value || isNaN(parseInt(thrT.value, 10)) || thrT.value <=0) {
+    if (isNaN(match.value) || parseInt(Number(match.value)) != match.value || isNaN(parseInt(match.value, 10)) || match.value <=0) {
         addWarning('D');
         ok = false;
     }
@@ -103,11 +103,11 @@ function addWarning(seq) {
      else if (seq == 'D'){
         if (!errorD) {
             var div = document.createElement('div');
-            div.innerHTML = '<div class="error" id="errorD" style="display: inline-block;">Wartość progu musi być dodatnią liczbą całkowitą!</div>';
-            document.getElementById('threshold_tDiv').appendChild(div);
+            div.innerHTML = '<div class="error" id="errorD" style="display: inline-block;">Wartość dopasowania musi być dodatnią liczbą całkowitą!</div>';
+            document.getElementById('matchDiv').appendChild(div);
         }
         else {
-            errorD.innerHTML = "Wartość progu musi być dodatnią liczbą całkowitą!";
+            errorD.innerHTML = "Wartość dopasowania musi być dodatnią liczbą całkowitą!";
         }
      }
     else {
