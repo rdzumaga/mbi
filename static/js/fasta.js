@@ -5,15 +5,10 @@ function addButton() {
     document.getElementById("buttonPlace").appendChild(btn);
     btn.className = "btn btn-primary btn-lg";
     
-    if (document.getElementById("values1")){
-        addValueToMatrix();
-    }
-    
     btn.onclick = function () {
          document.getElementById("seq").value = document.getElementById("seq").value.toUpperCase();
         if (sequenceValidation()) {
-            checkStepMode();
-            document.getElementById("myForm").submit();
+,            document.getElementById("myForm").submit();
         }
     };
 }
