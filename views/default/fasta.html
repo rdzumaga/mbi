@@ -8,8 +8,7 @@
 <br />
 	
 	
-	
-	
+
     
     <div class="row">
         
@@ -78,5 +77,33 @@
 	</div></ul>
 
 <br />
+		</div>
+		<div class="col-md-6">
+			{{if len(d) > 0:}}
+			
+			<table class="table table-bordered outputTable">
+				
+			
+			
+			{{for result in d:}}
+			<tr>
+				<td style="width:auto">
+					wynik1: {{=result[0]}} <br />
+					wynik2: {{=result[1]}} <br />
+					<span id="targetSpan{{=result[3]}}">wynik3: <span id="result{{=result[3]}}">{{=result[2]}}</span></span>
+				</td>
+				<td>
+					<span>{{=db[result[3]][:(result[4])]}}</span><span style="color:green"><strong>{{=db[result[3]][(result[4]):(result[4]+result[5])]}}</strong></span><span>{{=db[result[3]][(result[4]+result[5]):]}}</span>
+					
+					
+				</td>
+				<td>
+					Błędy: {{=result[6]}}
+				</td>
+			</tr>
+			{{pass}}
+			</table>
+	
+			{{pass}}
 		</div>
 	</div>
