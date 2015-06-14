@@ -53,7 +53,6 @@ def calcPathValue(path):
 	for node in path:
 		val+=node.value
 def findAllPaths(graph, start, end, path=[]):
-	#print "Finding path for start=", start, " end=", end
 	path=path+ [start]
 	
 	if(start==end):
@@ -70,7 +69,6 @@ def findAllPaths(graph, start, end, path=[]):
 	return []
 
 def createGraph(subregions):
-	print"!!!!!!!!!!!!!CREATING GRAPH!!!!!!!!!!!!!!!!"
 	#find possible connections between regions
 	connections=[]
 	for v in subregions:
@@ -93,10 +91,7 @@ def createGraph(subregions):
 		start=con[0]
 		end=con[1]
 		cost=con[2]
-		#print start, end, cost
-		#print "Start=", start.name
-		graph[start].append( (end, cost) )
-	print "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"	
+		graph[start].append( (end, cost) )	
 	return graph
 		
 

@@ -140,20 +140,13 @@ def calcDiagonalSums(seq, seqRef,tuplesRef, tuplesRefDict):
 			for col in tuplesRefDict[tuple]:
 				offset=row-col
 				diagonalDict[offset][0].add(row, col)
-								
-				#diagonalSums[offset]+=1#
-				#hotspotRows[offset].append(row)#
-	
+
 	#get rid of entries with sum==0
 	goodDiagonalDict=dict(diagonalDict)
 	for diag in diagonalDict:
 		if diagonalDict[diag][0].value==0:
 			del goodDiagonalDict[diag]
 			
-	print "Found following hotspots"
-	for diag in goodDiagonalDict:
-		goodDiagonalDict[diag][0].printIt()
-	
 	return goodDiagonalDict
 
 def scoreDiagonals0(diagonalSumDict, hotspotRows):
@@ -224,7 +217,7 @@ def scoreDiagonals(diagonalDict, seq, seqRef):
 	cols=len(seqRef)
 	rescoredDiagonals=dict(diagonalDict)
 	reward=20 #this should be some kind of positive value
-	print "!!!!!!!!!!!!!!!!!!SCORING!!!!!!!!!!!!!!!!"
+	
 	#group all consecutive hotspots into regions
 	for diag in diagonalDict:
 		regionNr=1
@@ -241,7 +234,6 @@ def scoreDiagonals(diagonalDict, seq, seqRef):
 					regionNr+=1
 						
 			region.add(hspots[i][0], hspots[i][1])	
-			region.printIt()
 		rescoredDiagonals[diag].append(copy.copy(region))
 
 			
@@ -295,32 +287,26 @@ def scoreDiagonals(diagonalDict, seq, seqRef):
 		sum=0"""
 	
 	if(len(rescoredDiagonals)>10):
-		rescoredDiagonals=getTopDiagonals(getTopDiagonals)
+		rescoredDiagonals=getTopDiagonals(rescoredDiagonals)
 	return rescoredDiagonals
 	
 def getTopDiagonals(diagonals):	
-	#get keys for the top ten diagonal sums			
-	keysForBestDiagonals=sorted(diagonals, key=diagonals.__getitem__[0].value, reverse=True)
-	keysForBestDiagonals=keysForBestDiagonals[0:11]
-
+	regions=listAllRegions(diagonals)
+	
 	#get updated diagonals dictionary
 	bestDiagonals=dict(diagonals)
-	print"---then---"
-	print bestDiagonals
-	for diagKey in diagonals.keys():
-		if diagKey not in keysForBestDiagonals:
-			del bestDiagonals[diagKey]
 	
-	print "----now---"
-	print "best diagonals:\n", bestDiagonals
-				
+	#get keys for the top ten diagonal sums	sort(key=lambda x: x.count, reverse=True)		
+	regions.sort(key=lambda x: x.value, reverse=True)	
+	topRegions=regions[0:11]
+	
+	for diagNum in diagonals:
+		for region in diagonals[diagNum]:
+			if region not in topRegions:
+				bestDiagonals[diagNum].remove(region)
+		
+
 	return bestDiagonals
-	"""
-	print "best diags:"
-	print keysForBestDiagonals
-	print
-	for i in range (len(keysForBestDiagonals)):
-		print keysForBestDiagonals[i]"""	
 
 def rescoreDiagonals0(blosum,bestDiagonals,hotspotRows):
 
@@ -349,8 +335,7 @@ def rescoreDiagonals0(blosum,bestDiagonals,hotspotRows):
 	return bestRescoredDiagonals
 
 def rescoreDiagonals(seq, seqRef, blosum, bestDiagonals):
-	rescoredDiagonals=createDiagonalDictFrom(bestDiagonals)
-	print rescoredDiagonals			
+	rescoredDiagonals=createDiagonalDictFrom(bestDiagonals)	
 	#iterate over diagonals and score the with blosum matrix
 	for diag in bestDiagonals:
 		rescoredRegions=[]
@@ -358,19 +343,19 @@ def rescoreDiagonals(seq, seqRef, blosum, bestDiagonals):
 			region.value=0
 			for row,col in region.hotspots:
 				region.value+=blosum[(seq[row], seqRef[col])]
-				print (row,col), region.value,
+				#print (row,col), region.value,
 			rescoredRegions.append(region)
-			print "//end reg"
+			#print "//end reg"
 		rescoredDiagonals[diag]=rescoredRegions
-	print
+	#print
 	#remove diagonals with scores below a cutoff threshold
 	bestRescoredDiagonals=dict(rescoredDiagonals)
 	
-	for diag in bestRescoredDiagonals:
-		print diag, 
-		for reg in bestRescoredDiagonals[diag]:
-			print reg.hotspots, reg.value,
-		print
+	#for diag in bestRescoredDiagonals:
+		#print diag, 
+		#for reg in bestRescoredDiagonals[diag]:
+			#print reg.hotspots, reg.value,
+		#print
 
 	
 	for diag in bestDiagonals:
@@ -381,21 +366,19 @@ def rescoreDiagonals(seq, seqRef, blosum, bestDiagonals):
 				else:
 					del bestRescoredDiagonals[diag]
 			
-	print "AFTER cutoff"
-	for diag in bestRescoredDiagonals:
-		print diag, 
-		for reg in bestRescoredDiagonals[diag]:
-			print reg.hotspots, reg.value,
-		print
+	#print "AFTER cutoff"
+	#for diag in bestRescoredDiagonals:
+		#print diag, 
+		#for reg in bestRescoredDiagonals[diag]:
+			#print reg.hotspots, reg.value,
+		#print
 	return bestRescoredDiagonals
 	
 def listAllRegions(diagonalRegionsDict):
-	print "LISTING all regions"
 	regions=[]
 	for diag in diagonalRegionsDict:
 		#diagonalRegionsDict[diag].printIt() 
 		for region in diagonalRegionsDict[diag]:
-			region.printIt()
 			regions.append(region)
 	print
 	return regions
@@ -484,93 +467,6 @@ def readBlosum(fname):
             d[(a1, a2)] = int(score)
     return d
 
-def traceback(scoreMatrix, startPos, blosum):
-    '''Find the optimal path through the matrix representing the alignment.
-
-    Starting from the best position (bottom right of a path), trace the whole path
-    back up (top-left corner), finding thus the best local alignment. Each step of the path (matrix cell)
-    corresponds to either a gap in a sequence (or both sequences) or a match/mismatch in the following way:
-        diagonal (i-1, j-1) - match/mismatch
-        up       (i-1, j  ) - gap in sequence 1
-        left     (i  , j-1) - gap in sequence 2
-
-    A step that should be taken is the one that leads to the predecessor cell
-    '''
-
-    END, DIAG, UP, LEFT = range(4)
-    alignedSeq = []
-    alignedSeqRef = []
-    i, j         = startPos
-    step         = nextStep(scoreMatrix, i, j,blosum)
-    
-    while step != END:
-        if step == DIAG:
-            alignedSeq.append(seq[i - 1])
-            alignedSeqRef.append(seqRef[j - 1])
-            i -= 1
-            j -= 1
-        elif step == UP:
-            alignedSeq.append(seq[i - 1])
-            alignedSeqRef.append('-')
-            i -= 1
-        else:
-            alignedSeq.append('-')
-            alignedSeqRef.append(seqRef[j - 1])
-            j -= 1
-       
-        step = nextStep(scoreMatrix, i, j,blosum)
-       
-    return ''.join(reversed(alignedSeq)), ''.join(reversed(alignedSeqRef))
-
-
-def nextStep(scoreMatrix, i, j, blosum):
-    score=scoreMatrix[i][j]
-    diag = scoreMatrix[i - 1][j - 1]
-    up   = scoreMatrix[i - 1][j]
-    left = scoreMatrix[i][j - 1]
-
-    similarity=blosum[(seq[i-1], seqRef[j-1])]
-
-    if(score==diag+similarity):
-        return 1
-    if (score==up+penalty):
-        return 2
-    if (score==left+penalty):
-        return 3
-
-    return 0
-
-def createAlignmentString(alignedSeq, alignedSeqRef):
-    '''Construct a special string showing identities, gaps, and mismatches.
-
-    This string is printed between the two aligned sequences and shows the
-    identities (|), gaps (-), and mismatches (:). As the string is constructed,
-    it also counts number of identities, gaps, and mismatches and returns the
-    counts along with the alignment string.
-
-    AAGGATGCCTCAAATCGATCT-TTTTCTTGG-
-    ::||::::::||:|::::::: |:  :||:|   <-- alignment string
-    CTGGTACTTGCAGAGAAGGGGGTA--ATTTGG
-    '''
-    # Build the string as a list of characters to avoid costly string
-    # concatenation.
-    idents, gaps, mismatches = 0, 0, 0
-    alignmentString = []
-    
-    for base1, base2 in zip(alignedSeq, alignedSeqRef):
-        if base1 == base2:
-            alignmentString.append('|')
-            idents += 1
-        elif '-' in (base1, base2):
-            alignmentString.append(' ')
-            gaps += 1
-        else:
-            alignmentString.append(':')
-            mismatches += 1
-
-    return ''.join(alignmentString), idents, gaps, mismatches
-
-
 def print_matrix(matrix):
     '''Print the scoring matrix.
 
@@ -586,7 +482,6 @@ def print_matrix(matrix):
         for col in row:
             print('{0:>4}'.format(col)),
         print
-
 		
 def printDotMatrix(seq, seqRef, matrix):
 	#print ref sequence's nukleotides
@@ -654,12 +549,8 @@ def findPathBetween(startPos, destRegion):
 		return path
 				
 def findPathWithHoles(regionsPath):
-	print "FIND path with holes"
-	print "We are connection the following hotspots:"
-	for region in regionsPath:
-		region.printIt()
+
 	if len(regionsPath)==0:
-		print "DEAD END!"
 		return None
 	startRegion=regionsPath[0]
 	path=startRegion.hotspots
@@ -669,7 +560,7 @@ def findPathWithHoles(regionsPath):
 		
 	return path	
 		
-def calcE(seq, seqRef,blosum=""):
+def calcE(seq, seqRef,blosum="", k=2):
 	if len(blosum)==0:
 		blosum=readBlosum("blosum.txt")
 		
@@ -677,34 +568,27 @@ def calcE(seq, seqRef,blosum=""):
 	cols=len(seqRef)
 	
 	# 1.identify common k-words between I (seq) and J(seqRef)
-	print "\n=======================================\n                STEP1\n=======================================\n"
+	#print "\n=======================================\n                STEP1\n=======================================\n"
 	tuplesRef,tuplesRefDict=getTuplesList(seqRef)
 	diagonalDict=calcDiagonalSums(seq, seqRef, tuplesRef,tuplesRefDict)
 	
 	matrix=createMatrixForDots(diagonalDict,seq, seqRef)#
-	printDotMatrix(seq, seqRef, matrix)#
+	#printDotMatrix(seq, seqRef, matrix)#
 
 	# 2a. Score diagonals with k-word matches and identify 10 best diagonals
-	print "\n=======================================\n                STEP2\n=======================================\n"
+	#print "\n=======================================\n                STEP2\n=======================================\n"
 	bestTenDiagonals=scoreDiagonals(diagonalDict,seq, seqRef)
-	print "BestTenDiagonals:"
-	for diag in bestTenDiagonals:
-		print diag, 
-		for reg in bestTenDiagonals[diag]:
-			print reg.hotspots, reg.value,
-		print
-
 
 
 	# 3. Rescore initial regions with a substitution score matrix and get best 10 subregions
-	print "\n=======================================\n                STEP3\n=======================================\n"
+	#print "\n=======================================\n                STEP3\n=======================================\n"
 	#rescoredDiagonals=rescoreDiagonals(blosum, betsTenDiagonals, hotspotRows)
 	diagonalRegionsDict=rescoreDiagonals(seq, seqRef, blosum, bestTenDiagonals)
 
 	if len(diagonalRegionsDict)>0:
 
 		#4. Join initial regions using gaps, penalise for gaps
-		print "\n=======================================\n                STEP4\n=======================================\n"
+		#print "\n=======================================\n                STEP4\n=======================================\n"
 				
 		mygraph=graph.createGraph(listAllRegions(diagonalRegionsDict))
 		if mygraph==None:
@@ -714,28 +598,27 @@ def calcE(seq, seqRef,blosum=""):
 		value=0
 		allPaths=[]
 		for startNode in mygraph:
-			print "ooooooooooooooooooooooooooooooooooooooooo"
+			#print "ooooooooooooooooooooooooooooooooooooooooo"
 			for node in mygraph[startNode]:
 				path, value=graph.findBestPath(mygraph, startNode, node[0])
-				print value,
+				#print value,
 				if path:
 					allPaths.append([value,path])
-					for n in path:	
-						print n, "->",
-				print
+					#for n in path:	
+						#print n, "->",
+				#print
 				
 		allPaths.sort(reverse=True)
 		bestPath=allPaths[0]
 		# 5. Perform dynamic programming to find final alignments
 		print "\n=======================================\n                STEP5\n=======================================\n"
 		#list all cells on the path starting with first diagonal run and ending with the last one from the path found before
-		print "path len=",len(bestPath)
 		rowColPath=findPathWithHoles(bestPath[1])
 		if rowColPath==None:
-			return "Error"
+			return "ERROR","ERROR", 0
 	
-		print "Final path (before NW):"
-		print rowColPath
+		#print "Final path (before NW):"
+		#print rowColPath
 
 		matrix, seqAligned, seqRefAligned,score=FastaSW.SmithWaterman(seq, seqRef, rowColPath, k)
 
@@ -744,12 +627,43 @@ def calcE(seq, seqRef,blosum=""):
 		print seqAligned
 		print seqRefAligned
 		print score
-		printMatrix(seq, seqRef, matrix)
+		#printMatrix(seq, seqRef, matrix)
 		
 		return seqAligned, seqRefAligned, score
+
+def readDb(fname):
+	lines = open(fname, "rt").readlines()
+	db=[]
+	for line in lines:
+		#get rid of CRLF
+		db.append(line[:-1])
+	return db
+	
+def fasta(seq, k=2, db=[], blosum={} ):
+	if len(db)==0:
+		db=readDb("applications/mbi/modules/db.txt")
+	
+	if len(blosum)==0:
+		blosum=readBlosum("applications/mbi/modules/blosum.txt")
+	
+	answer=[]
+	for ref in db:
+		seqAligned, seqRefAligned, score=calcE(seq, ref, blosum, k)
+		answer+=[seqAligned, seqRefAligned, score]
 	
 	
+
+"""
+seq="ACTTGATAGCCGATTAGGAC"
+seqRef="ATTGATTTAGTATATTATTAAATGTATATATTAATTCAATATTATTATTCTATTCATTTTTATTCATTTT"	
 calcE(seq,seqRef)
+
+seqRef="CAAATTTATAATATATTAATCTATATATTAATTTAGAATTCTATTCTAATTCGAATTCAATTTTTAAATA"	
+calcE(seq,seqRef)
+
+seqRef="TTCATATTCAATTAAAATTGAAATTTTTTCATTCGCGAGGAGCCGGATGAGAAGAAACTCTCATGTCCGG"	
+calcE(seq,seqRef)"""
+
 
 
 

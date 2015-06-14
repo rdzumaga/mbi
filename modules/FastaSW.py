@@ -155,11 +155,11 @@ def traceback(scoreMatrix, startPos, seq, seqRef, penalty, match, mismatch):
     alignedSeq = []
     alignedSeqRef = []
     i, j         = startPos
-    print "starPos=", startPos
+    #print "starPos=", startPos
     step,newscore   = nextStep(scoreMatrix, i, j, seq, seqRef, penalty, match, mismatch,score)
 
     while step != END:
-        print (i,j), "score=", score
+        #print (i,j), "score=", score
         if step == DIAG:
             alignedSeq.append(seq[i - 1])
             alignedSeqRef.append(seqRef[j - 1])
