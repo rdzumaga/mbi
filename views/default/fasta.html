@@ -7,7 +7,9 @@
      <h1>Algorytm FASTA</h1>
 <br />
 	
-	{{=db}}
+	
+	
+	
     
     <div class="row">
         
@@ -64,6 +66,16 @@
 </table>
 <div id="buttonPlace" class="col-md-offset-2"></div>
 
+<br />
+<h4>
+	Baza fragmentów DNA:
+</h4>
+<ul>
+		{{for sequence in db:}}
+		<li>{{=sequence}}</li>
+		{{pass}}
+	</ul>
 
+<br />
 		</div>
 	</div>
