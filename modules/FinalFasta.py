@@ -361,9 +361,10 @@ def fastaScoreAlignment(seq, seqRef, k, gapPenalty=-10, rescoreCutoff=10, matchR
 	#print "\n======================================="                STEP4\n=======================================\n"
 				
 	mygraph=graph.createGraph(listAllRegions(diagonalRegionsDict), -1)
+	
 	if mygraph==None:
-		print "step4 error"
-		return 0
+		regions=listAllRegions(diagonalRegionsDict)
+		init_n=max(regions)
 		
 	path=[]
 	value=0
@@ -376,6 +377,8 @@ def fastaScoreAlignment(seq, seqRef, k, gapPenalty=-10, rescoreCutoff=10, matchR
 				
 	allPaths.sort(reverse=True)
 	init_n=allPaths[0]
+	
+	
 		
 	# 5. Perform dynamic programming (Smith-Waterman)to find final alignments
 
@@ -404,11 +407,8 @@ def fasta(seq, k=2, gapPenalty=-10, rescoreCutoff=10, matchReward=20, db=[], blo
 		init1, init_n, opt, seqAligned, seqRefAligned, refStartIndex, length=fastaScoreAlignment(seq, db[i], k, gapPenalty, rescoreCutoff, matchReward, blosum)
 		
 		astring, idents, gaps, mismatched=createAlignmentString(seqAligned, seqRefAligned)
-		answer+=[init1, init_n, opt, i, refStartIndex, length, mismatched]
+		answer.append([init1, init_n, opt, i, refStartIndex, length, mismatched])
 		
 		
 	return answer
 	
-seq2="ACTTGATAGCCGATTAGGAC"
-seq="ACTG"
-fasta(seq, 2)
