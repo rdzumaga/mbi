@@ -1,14 +1,18 @@
-#seqRef="GAATTC"
-#seq="GATTA"
-#penalty=-5
 
 # Create an empty matrix
 def createMatrix(rows, cols):
+    """
+    initialize matrix with 0
+    """
+	
     return [[0]*cols for _ in xrange(rows)]
 
 # Read BLOSUM table
 def readBlosum(fname):
-
+    """
+    Read from file the Blosum table
+    """
+	
     #dictionary holding pairs of nucleotides and their BLOSUM matrix value, e.g.: ('T', 'A'): -4
     d = {}
     lines = open(fname, "rt").readlines()
@@ -21,9 +25,21 @@ def readBlosum(fname):
             d[(a1, a2)] = int(score)
     return d
 
-def calcMatrix(seqVertical, seqHorizontal, blosum, penalty):
-    rows = len(seqVertical)+1
-    cols = len(seqHorizontal)+1
+def createScoreMatrix(seq, seqRef, blosum, penalty):
+    '''
+    Create a matrix and fill it with values representing possible alignments of two sequences
+
+    Best alignment can be found by locating a path in the matrix with highest cumulative score.
+
+    @param  seq	    String representing query DNA sequency
+    @param  seqRef	DNA reference string, against which the query sequence will be compared
+	@param	blosum	Dictionary containing values for scoring matches between two nucleotides. Its keys are tuples with two letter, e.g.: ('T', 'A')
+    @param  penalty	Gap penalty, must be negative or 0
+   	
+    @retval         Score matrix                        
+    '''
+    rows = len(seq)+1
+    cols = len(seqRef)+1
 
     F = createMatrix(rows, cols)
 
@@ -34,25 +50,41 @@ def calcMatrix(seqVertical, seqHorizontal, blosum, penalty):
 
     for i in range(1, rows):
         for j in range(1, cols):
-            match = F[i-1][j-1] + blosum[(seqVertical[i-1], seqHorizontal[j-1])]
+            match = F[i-1][j-1] + blosum[(seq[i-1], seqRef[j-1])]
             delete = F[i-1][j] + penalty
             insert = F[i][j-1] + penalty
 
             F[i][j] = max(match, delete, insert)
-
+			
     return F
 
-def calcMatrixStepByStep(seqVertical, seqHorizontal, blosum, penalty, step):
-    rows = len(seqVertical)+1
-    cols = len(seqHorizontal)+1
-    #rows=step/len(seqHorizontal)+1
-    #cols=step%len(seqHorizontal)
-    #print "step=", step, "rows=", rows, "cols=", cols
+def calcMatrixStepByStep(seq, seqRef, blosum, penalty, step):
+    """
+    Calculate the score matrix until idicated step is reached
+
+    Parameters:
+    @param  seq	    	String representing query DNA sequency
+    @param  seqRef		DNA reference string, against which the query sequence will be compared
+	@param	blosum	Dictionary containing values for scoring matches between two nucleotides. Its keys are tuples with two letter, e.g.: ('T', 'A')
+    @param  penalty		Gap penalty, must be negative or 0
+	@param  step    	Number a steps to take when calculating the algorithm
+	
+    @retval             List of steps.
+                        A step consists of [nextBestPredecessorIndex, nextBestPredecessorRow, nextBestPredecessorCol, scoreFromDiagonal, scoreFromUp, ScoreFromLeft].
+                        nextBestStepIndex takes on the following values
+                            0 - diagonal predecessor
+                            1 - left predecessor
+                            2 - up predecessor
+                            3 - no predecessor    
+    """
+    rows = len(seq)+1
+    cols = len(seqRef)+1
 
     F = createMatrix(rows, cols)
 
     steps=[]
 
+	#Fill the null row and col with 0
     for i in range(0, rows):
         F[i][0] = i * penalty
     for j in range(0, cols):
@@ -68,8 +100,9 @@ def calcMatrixStepByStep(seqVertical, seqHorizontal, blosum, penalty, step):
                 #match or delete or insert =(value, row, col)
                 possibilities=[]
                 indexOfBest=0
+				
                 #match (diag)
-                diag=[F[i-1][j-1] + blosum[(seqVertical[i-1], seqHorizontal[j-1])],i-1, j-1]
+                diag=[F[i-1][j-1] + blosum[(seq[i-1], seqRef[j-1])],i-1, j-1]
                 possibilities.append(diag)
 
                 #delete (up)
@@ -92,7 +125,7 @@ def calcMatrixStepByStep(seqVertical, seqHorizontal, blosum, penalty, step):
 
     return steps
 
-def traceback(seq, seqRef, scoreMatrix, startPos, blosum,penalty):
+def traceback(scoreMatrix, startPos, seq, seqRef, penalty, blosum):
     '''Find the optimal path through the matrix representing the alignment.
 
     Starting from the best position (bottom right of a path), trace the whole path
@@ -103,6 +136,15 @@ def traceback(seq, seqRef, scoreMatrix, startPos, blosum,penalty):
         left     (i  , j-1) - gap in sequence 2
 
     A step that should be taken is the one that leads to the predecessor cell
+	Parameters:
+    @param  scoreMatrix	Matrix with each cell scored
+	@param	startPos	(row,col)index for the bottom-right cell of matrix
+    @param  seq	        String representing query DNA sequency
+    @param  seqRef		DNA reference string, against which the query sequence will be compared
+    @param  penalty		Gap penalty, must be negative or 0
+    @param	blosum	Dictionary containing values for scoring matches between two nucleotides. Its keys are tuples with two letter, e.g.: ('T', 'A')
+	
+    @retval  A Tuple of strings: (aligned query sequence,aligned reference sequence)
     '''
 
     END, DIAG, UP, LEFT = range(4)
@@ -128,8 +170,17 @@ def traceback(seq, seqRef, scoreMatrix, startPos, blosum,penalty):
 
     return ''.join(reversed(alignedSeq)), ''.join(reversed(alignedSeqRef))
 
-
 def nextStep(seq, seqRef, scoreMatrix, i, j, blosum, penalty):
+    """
+	Calculate next step in the tracedback path
+	
+	Return:
+		1 - diagonal step
+		2 - up step
+		3 - left step
+		0 - reached the end of path
+    """	
+	
     if(i==0 or j==0):
         return 0
 
@@ -176,32 +227,26 @@ def createAlignmentString(alignedSeq, alignedSeqRef):
 
     return ''.join(alignmentString), idents, gaps, mismatches
 
+def needlemanWunsch(step=-1, seq="GATTA", seqRef="GAATTC", penalty=-5, blosumFile="blosum.txt"):
+    """
+    Method calculating global alignment of two sequences.
 
-def print_matrix(matrix):
-    '''Print the scoring matrix.
-
-    ex:
-    0   0   0   0   0   0
-    0   2   1   2   1   2
-    0   1   1   1   1   1
-    0   0   3   2   3   2
-    0   2   2   5   4   5
-    0   1   4   4   7   6
-    '''
-    for row in matrix:
-        for col in row:
-            print('{0:>4}'.format(col)),
-        print
-
-def needlemanWunsch(step=-1, seq="GATTA", seqRef="GAATTC", penalty=-5):
-    blosum=readBlosum("applications/mbi/modules/blosum.txt")
+    @param  step	number of steps to take when calculating the score matrix. Each step move from cell F[i][j] to cell F[i][j+1] or F[i+1][0] when reached the end of a row. If step<0, the whole algorithm is executed, along with string alignements
+    @param  seq	        string representing query DNA sequency
+    @param  seqRef	DNA reference string, against which the query sequence will be compared
+    @param  penalty	gap penalty, must be negative or 0
+    
+    @retval Array of steps taken, if step parameter>0, otherwise, computed score matrix (without the 'null' row and col). When returning an array of steps, one step consists of [nextBestPredecessorIndex, nextBestPredecessorRow, nextBestPredecessorCol, scoreFromDiagonal, scoreFromUp, ScoreFromLeft]
+    """
+    blosum=readBlosum(blosumFile)
     matrix=[]
 
     if step>=0 and step<len(seq)*len(seqRef)+1:
         steps=calcMatrixStepByStep(seq, seqRef, blosum, penalty, step)
         return steps
 
-    matrix =calcMatrix(seq, seqRef, blosum, penalty)
+    matrix =createScoreMatrix(seq, seqRef, blosum, penalty)
     rightBottomCell=(len(seq), len(seqRef))
-    seqAligned, seqRefAligned = traceback(seq, seqRef, matrix, rightBottomCell, blosum, penalty)
+    seqAligned, seqRefAligned = traceback(matrix, rightBottomCell, seq, seqRef, penalty, blosum)
     return [row[1:] for row in matrix[1:]], seqAligned, seqRefAligned
+

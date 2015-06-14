@@ -1,17 +1,24 @@
-import argparse
+"""@package SW
+Compute local alignement of two DNA sequences
+"""
+
 import os
 import re
 import sys
-import unittest
-
 
 # Create an empty matrix
-def create_matrix(m, n):
-    return [[0]*n for _ in xrange(m)]
-
-# Read the BLOSUM50 table
+def createMatrix(rows, cols):
+    """
+    initialize matrix with 0
+    """
+    return [[0]*cols for _ in xrange(rows)]
+	
+# Read the BLOSUM table
 def readBlosum(fname):
-
+    """
+    Read from file the Blosum table
+    """
+	
     #dictionary holding pairs of nucleotides and their BLOSUM matrix value, e.g.: ('T', 'A'): -4
     d = {}
     lines = open(fname, "rt").readlines()
@@ -24,40 +31,27 @@ def readBlosum(fname):
             d[(a1, a2)] = int(score)
     return d
 
-
-
-
-
-
-
-
-
-seq02= "GAAAGAT" #horizontal
-seq01 = "GATGAA"#vertical
-#seqRef= "GGCTCAATCA"
-#seq= "ACCTAAGG"
-#seq = 'AGCACACA'
-#seqRef = 'ACACACTA'
-seq02 = "FTFTALILLAVAV"
-seq01 = "FTALLLAAV"
-
-
-seq02= "CGTGAATTCAT" #horizontal
-seq01 = "GACTTAC"#vertical
-
-#---------------functions--------------------
-
 def createScoreMatrix(seq, seqRef, penalty, match, mismatch):
-    '''Create a matrix and fill it with values representing possible alignments of two sequences
-
-    Best alignment can be found by locating a path in the matrix (when represenet as a 2D graph)
-    with highest cumulative score.
     '''
+    Create a matrix and fill it with values representing possible alignments of two sequences
+
+    Best alignment can be found by locating a path in the matrix with highest cumulative score.
+
+    @param  seq	        String representing query DNA sequency
+    @param  seqRef	DNA reference string, against which the query sequence will be compared
+    @param  penalty	Gap penalty, must be negative or 0
+    @param  match	The score to add for a match between a pair of nucleotides, must be >0
+    @oparam mismatch	The score to add for a mismatch between a pair of nucleotides
+	
+    @retval             A Tuple; Score matrix and the (row,col)position of a cell with best score
+                        
+    '''
+    
     rows=len(seq)+1
     cols=len(seqRef)+1
 
     #initialize the matrix with 0
-    scoreMatrix = [[0 for col in range(cols)] for row in range(rows)]
+    scoreMatrix = createMatrix(rows, cols)
 
     maxScore = 0
     bestPos   = None    # i and j index for matrix cell with highest score
@@ -75,7 +69,6 @@ def createScoreMatrix(seq, seqRef, penalty, match, mismatch):
     assert bestPos is not None, 'position with the highest score not found'
     return scoreMatrix, bestPos
 
-
 def calcScore(seq, seqRef, matrix, i, j, penalty, match, mismatch):
     '''Calculate score for a given position in the scoring matrix.
 
@@ -89,18 +82,81 @@ def calcScore(seq, seqRef, matrix, i, j, penalty, match, mismatch):
 
     return max(0, diagScore, upScore, leftScore)
 
+def createMatrixStepByStep(step, seq, seqRef, penalty, match, mismatch):
+    """
+    Calculate the score matrix until idicated step is reached
+
+    Parameters:
+    @param  step       Number a steps to take when calculating the algorithm
+    @param  seq	        String representing query DNA sequency
+    @param  seqRef	DNA reference string, against which the query sequence will be compared
+    @param  matrix	Score matrix
+    @param  penalty	Gap penalty, must be negative or 0
+    @param  match	The score to add for a match between a pair of nucleotides, must be >0
+    @oparam mismatch	The score to add for a mismatch between a pair of nucleotides
+	
+    @retval             A Tuple; partially calulated score matrix, a list of steps.
+                        A step consists of [nextBestPredecessorIndex, nextBestPredecessorRow, nextBestPredecessorCol, scoreFromDiagonal, scoreFromUp, ScoreFromLeft].
+                        nextBestStepIndex takes on the following values
+                            0 - diagonal predecessor
+                            1 - left predecessor
+                            2 - up predecessor
+                            3 - no predecessor    
+    """
+    rows=len(seq)+1
+    cols=len(seqRef)+1
+
+    #initialize the matrix with 0
+    scoreMatrix = createMatrix(rows, cols)
+    steps=[]
+
+    maxScore = 0
+    bestPos   = None    # i and j index for matrix cell with highest score
+
+    counter=0
+    # Fill the scoring matrix.
+    for i in range(1, rows):
+        for j in range(1, cols):
+	    counter+=1
+
+	    #check if reached the indicated step nr
+            if counter<=step:
+                steps, score = calcStep(steps,seq, seqRef, scoreMatrix, i, j, penalty, match, mismatch)
+                if score > maxScore:
+                    maxScore = score
+                    bestPos   = (i, j)
+            else:
+                break
+
+	    scoreMatrix[i][j] = score
+
+    assert bestPos is not None, 'position with the highest score not found'
+    return scoreMatrix, steps
 
 def calcStep(steps, seq, seqRef, matrix, i, j, penalty, match, mismatch):
     '''Calculate score for a given position in the scoring matrix.
 
     The score is based on the up, left, and upper-left neighbors.
-	best index can take on following values:
-		0 - diag
-		1 - left
-		2 - up
-		3 - zero
+    best index can take on following values:
+	0 - diag
+	1 - left
+	2 - up
+	3 - zero
+	
+    Parameters:
+    @param  steps       Number a steps to take when calculating the algorithm
+    @param  seq	        String representing query DNA sequency
+    @param  seqRef	DNA reference string, against which the query sequence will be compared
+    @param  matrix	Score matrix
+    @param  i           row index for cell from which a step will be taken
+    @param  j           col index for cell from which a step will be taken
+    @param  penalty	Gap penalty, must be negative or 0
+    @param  match	The score to add for a match between a pair of nucleotides, must be >0
+    @oparam mismatch	The score to add for a mismatch between a pair of nucleotides
+	
+    @retval             A Tuple; the list of steps with appended new step, score calculated for the nest step.
+                        The appended step consists of [nextBestPredecessorIndex, nextBestPredecessorRow, nextBestPredecessorCol, scoreFromDiagonal, scoreFromUp, ScoreFromLeft]
     '''
-    #print "steps: ", steps
     nextStep=[]
     possibilities=[]
     bestIndex=0
@@ -126,45 +182,11 @@ def calcStep(steps, seq, seqRef, matrix, i, j, penalty, match, mismatch):
     if possibilities[bestIndex][0]<0:
         bestIndex=3
 
-    #print "possi[best]=",bestIndex, " ___________", diag, up, left
     best=possibilities[bestIndex]
     steps.append([bestIndex, best[1], best[2],  possibilities[0][0], possibilities[1][0], possibilities[2][0]])
 
     return steps, possibilities[bestIndex][0]
-
-def calcMatrixStepByStep(step, seq, seqRef, penalty, match, mismatch):
-    rows=len(seq)+1
-    cols=len(seqRef)+1
-
-    #initialize the matrix with 0
-    scoreMatrix = [[0 for col in range(cols)] for row in range(rows)]
-    steps=[]
-
-    maxScore = 0
-    bestPos   = None    # i and j index for matrix cell with highest score
-
-    counter=0
-    # Fill the scoring matrix.
-    for i in range(1, rows):
-        for j in range(1, cols):
-	    counter+=1
-
-	    #check if reached the indicated step nr
-            if counter<=step:
-                steps, score = calcStep(steps,seq, seqRef, scoreMatrix, i, j, penalty, match, mismatch)
-                if score > maxScore:
-                    maxScore = score
-                    bestPos   = (i, j)
-            else:
-                break
-
-	    scoreMatrix[i][j] = score
-
-
-    assert bestPos is not None, 'position with the highest score not found'
-    return scoreMatrix, steps
-
-
+	
 def traceback(scoreMatrix, startPos, seq, seqRef, penalty, match, mismatch):
     '''Find the optimal path through the matrix representing the alignment.
 
@@ -176,6 +198,15 @@ def traceback(scoreMatrix, startPos, seq, seqRef, penalty, match, mismatch):
         left     (i  , j-1) - gap in sequence 2
 
     A step that should be taken is the one that leads to the predecessor cell
+    Parameters:
+    @param  scoreMatrix	Matrix with each cell scored
+    @param  seq	        String representing query DNA sequency
+    @param  seqRef	DNA reference string, against which the query sequence will be compared
+    @param  penalty	Gap penalty, must be negative or 0
+    @param  match	The score to add for a match between a pair of nucleotides, must be >0
+    @oparam mismatch	The score to add for a mismatch between a pair of nucleotides
+	
+    @retval  A Tuple of strings: (aligned query sequence,aligned reference sequence)
     '''
 
     END, DIAG, UP, LEFT = range(4)
@@ -203,8 +234,17 @@ def traceback(scoreMatrix, startPos, seq, seqRef, penalty, match, mismatch):
 
     return ''.join(reversed(alignedSeq)), ''.join(reversed(alignedSeqRef))
 
-
 def nextStep(scoreMatrix, i, j, seq, seqRef, penalty, match, mismatch):
+    """
+	Calculate next step in the tracedback path
+	
+	Return:
+		1 - diagonal step
+		2 - up step
+		3 - left step
+		0 - reached the end of path
+    """	
+	
     if(i==0 or j==0):
         return 0
 
@@ -224,18 +264,9 @@ def nextStep(scoreMatrix, i, j, seq, seqRef, penalty, match, mismatch):
 
     return 0
 
-"""    if diag >= up and diag >= left:     # Tie - DIAG step "wins".
-        return 1 if diag != 0 else 0    # 1 signals a DIAG step. 0 signals the end.
-    elif up > diag and up >= left:      # Tie -  UP step"wins".
-        return 2 if up != 0 else 0      # UP step or end.
-    elif left > diag and left > up:
-        return 3 if left != 0 else 0    # LEFT step or end.
-    else:
-        raise ValueError('invalid move during traceback')"""
-
-
 def createAlignmentString(alignedSeq, alignedSeqRef):
-    '''Construct a special string showing identities, gaps, and mismatches.
+    '''
+    Construct a special string showing identities, gaps, and mismatches.
 
     This string is printed between the two aligned sequences and shows the
     identities (|), gaps (-), and mismatches (:). As the string is constructed,
@@ -263,50 +294,11 @@ def createAlignmentString(alignedSeq, alignedSeqRef):
 
     return ''.join(alignmentString), idents, gaps, mismatches
 
-
-def print_matrix(matrix):
-    '''Print the scoring matrix.
-
-    ex:
-    0   0   0   0   0   0
-    0   2   1   2   1   2
-    0   1   1   1   1   1
-    0   0   3   2   3   2
-    0   2   2   5   4   5
-    0   1   4   4   7   6
-    '''
-    for row in matrix:
-        for col in row:
-            print('{0:>4}'.format(col)),
-        print
-
-
-class ScoreMatrixTest(unittest.TestCase):
-    '''Compare the matrix produced by create_score_matrix() with a known matrix.'''
-    def test_matrix(self):
-        # From Wikipedia (en.wikipedia.org/wiki/Smith%E2%80%93Waterman_algorithm)
-        #                -   A   C   A   C   A   C   T   A
-        knownMatrix = [[0,  0,  0,  0,  0,  0,  0,  0,  0],  # -
-                        [0,  2,  1,  2,  1,  2,  1,  0,  2],  # A
-                        [0,  1,  1,  1,  1,  1,  1,  0,  1],  # G
-                        [0,  0,  3,  2,  3,  2,  3,  2,  1],  # C
-                        [0,  2,  2,  5,  4,  5,  4,  3,  4],  # A
-                        [0,  1,  4,  4,  7,  6,  7,  6,  5],  # C
-                        [0,  2,  3,  6,  6,  9,  8,  7,  8],  # A
-                        [0,  1,  4,  5,  8,  8, 11, 10,  9],  # C
-                        [0,  2,  3,  6,  7, 10, 10, 10, 12]]  # A
-
-        global seq, seqRef
-        seq = 'AGCACACA'
-        seqRef = 'ACACACTA'
-        rows = len(seq) + 1
-        cols = len(seqRef) + 1
-
-        matrixToTestest, bestPos = createScoreMatrix(rows, cols)
-        self.assertEqual(knownMatrix, matrixToTest)
-
-
 def printMatrix(matrix,seq, seqRef):
+    """
+    Helper function for printing the score matrix and letters of both sequences on the console
+    """
+    
     #print ref sequence's nukleotides
     rows=len(seq)
     cols=len(seqRef)
@@ -315,6 +307,8 @@ def printMatrix(matrix,seq, seqRef):
     for n in range(cols):
         print seqRef[n], "  ",
     print
+
+    #print a letter from query sequence and the corresponding values
     i=0
     for row in matrix:
         if(row>0):
@@ -323,23 +317,29 @@ def printMatrix(matrix,seq, seqRef):
             print "    ",
         i+=1
         for col in row:
-            #if col!=0:
             print ('{0:>4}'.format(col)),
-            #else:
-               # print "    ",
         print
 
-#-4,5, -3
-seq02= "CGTGAATTCAT" #horizontal
-seq01 = "GACTTAC"#vertical
-def SmithWaterman(step=0, seq="GACTTAC", seqRef="CGTGAATTCAT", penalty=-4, match=5, mismatch=-3):
+def SmithWaterman(step=-1, seq="GACTTAC", seqRef="CGTGAATTCAT", penalty=-4, match=5, mismatch=-3):
+    """
+    Method calculating local alignment of two sequences.
+    Parameters:
+    @param  step	number of steps to take when calculating the score matrix. Each step move from cell F[i][j] to cell F[i][j+1] or F[i+1][0] when reached the end of a row. If step<0, the whole algorithm is executed, along with string alignements
+    @param  seq	        string representing query DNA sequency
+    @param  seqRef	DNA reference string, against which the query sequence will be compared
+    @param  penalty	gap penalty, must be negative or 0
+    @param  match	The score to add for a match between a pair of nucleotides, must be >0
+    @oparam mismatch	The score to add for a mismatch between a pair of nucleotides
+	
+    @retval Array of steps taken, if step parameter>0, otherwise, computed score matrix (without the 'null' row and col). When returning an array of steps, one step consists of [nextBestPredecessorIndex, nextBestPredecessorRow, nextBestPredecessorCol, scoreFromDiagonal, scoreFromUp, ScoreFromLeft]
+    """
+	
     rows=len(seq)+1
     cols=len(seqRef)+1
     matrix=[]
 
-    if step>0 and step<len(seq)*len(seqRef)+1:
-        matrix, steps=calcMatrixStepByStep(step, seq, seqRef, penalty, match, mismatch)
-        #printMatrix(matrix, seq, seqRef)
+    if step>=0 and step<len(seq)*len(seqRef)+1:
+        matrix, steps=createMatrixStepByStep(step, seq, seqRef, penalty, match, mismatch)
         return steps
 
     matrix, bestPos = createScoreMatrix(seq, seqRef, penalty, match, mismatch)
@@ -349,60 +349,3 @@ def SmithWaterman(step=0, seq="GACTTAC", seqRef="CGTGAATTCAT", penalty=-4, match
     seqAligned, seqRefAligned = traceback(matrix, bestPos, seq, seqRef, penalty, match, mismatch)
     assert len(seqAligned) == len(seqRefAligned), 'aligned strings are not the same size'
     return [row[1:] for row in matrix[1:]], seqAligned, seqRefAligned
-
-
-
-
-
-""""
-#------------------------------------
-try:
-    t=1
-    #parse_cmd_line()
-except ValueError as err:
-    print('error:', err)
-
-
-# The scoring matrix contains an extra row and column for the gap (-), hence
-# the +1 here.
-rows = len(seq) + 1
-cols = len(seqRef) + 1
-
-# Initialize the scoring matrix.
-scoreMatrix, bestPos = createScoreMatrix(rows, cols)
-print "----------------------------------------"
-print_matrix(scoreMatrix)
-
-# Traceback. Find the optimal path through the scoring matrix. This path
-# corresponds to the optimal local sequence alignment.
-seqAligned, seqRefAligned = traceback(scoreMatrix, bestPos)
-assert len(seqAligned) == len(seqRefAligned), 'aligned strings are not the same size'
-
-# Pretty print the results. The printing follows the format of BLAST results
-# as closely as possible.
-alignmentStr, idents, gaps, mismatches = createAlignmentString(seqAligned, seqRefAligned)
-alength = len(seqAligned)
-
-
-print "***************stats**************"
-print "seq=", seq, "rows=len(seq), seq is vertical and string in"
-print "seqRef=", seqRef,"cols=len(seqRef), seqRef is horizontal and string ref"
-print "seqAligned=",seqAligned
-print "seqRefAligned=",seqRefAligned
-print "*********************************"
-
-print
-print(' Identities = {0}/{1} ({2:.1%}), Gaps = {3}/{4} ({5:.1%})'.format(idents,
-      alength, idents / alength, gaps, alength, gaps / alength))
-print
-for i in range(0, alength, 60):
-    seqSlice = seqAligned[i:i+60]
-    print('Query      {0:<4}  {1}  {2:<4}'.format(i + 1, seqSlice, i + len(seqSlice)))
-    print('                 {0}'.format(alignmentStr[i:i+60]))
-    seqRefAlignedSlice = seqRefAligned[i:i+60]
-    print('Reference  {0:<4}  {1}  {2:<4}'.format(i + 1, seqRefAlignedSlice, i + len(seqRefAlignedSlice)))
-    print()
-
-strG = str(raw_input("Genome sequence: "))
-"""
-
