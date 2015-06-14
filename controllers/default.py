@@ -10,6 +10,7 @@
 
 import NW
 import SW
+import Fasta
 
 def algorithm():
 
@@ -80,7 +81,36 @@ def smithWaterman():
 def fasta():
 
 
-    return dict()
+    d = ""
+
+
+    form=FORM(DIV(LABEL('Sekwencja :', _for="seq", _class='col-sm-2 control-label'), DIV(INPUT(_id='seq', _name='seq', _type='text', _style='text-transform: uppercase', _class='form-control', _placeholder = 'np. AAGCT'), _class='col-md-4'), _class='form-group', _id='seqDiv'),
+
+			  DIV(LABEL('Długość słowa', _for="length", _class='col-sm-2 control-label'), DIV(INPUT(_id='length', _name='length', _class='form-control', _placeholder = 'np. -2'), _class='col-md-4'), _class='form-group', _id='lengthDiv'),
+			  
+			  DIV(LABEL('Próg C: ', _for="threshold_c", _class='col-sm-2 control-label'), DIV(INPUT(_id='threshold_c', _name='threshold_c', _class='form-control', _placeholder = 'np. -2'), _class='col-md-4'), _class='form-group', _id='threshold_cDiv'),
+			  
+			  DIV(LABEL('Próg T: ', _for="threshold_t", _class='col-sm-2 control-label'), DIV(INPUT(_id='threshold_t', _name='threshold_t', _class='form-control', _placeholder = 'np. -2'), _class='col-md-4'), _class='form-group', _id='threshold_tDiv'),
+
+              DIV(LABEL('Kara za przerwę:', _for="break_penalty", _class='col-sm-2 control-label'), DIV(INPUT(_id='break_penalty', _name='break_penalty', _class='form-control', _placeholder = 'np. -2'), _class='col-md-4'), _class='form-group', _id='break_penaltyDiv')
+
+
+
+
+
+
+              )
+
+    form['_class']='form-horizontal'
+    form['_id']='myForm'
+
+
+    if form.accepts(request.vars, session, keepvalues=True):
+        penalty=int(request.vars.break_penalty)
+        d=Fasta.fasta(request.vars.seq)
+
+
+    return dict(form=form, d=d)
 
 
 
