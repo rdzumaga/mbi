@@ -33,7 +33,7 @@ response.menu += [
 ]
 
 response.menu += [
-    (T('Algorytm FASTA'), False, URL('default', 'algorithm'), [])
+    (T('Algorytm FASTA'), False, URL('default', 'fasta'), [])
 ]
 
 DEVELOPMENT_MENU = False
