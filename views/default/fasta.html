@@ -88,17 +88,17 @@
 			{{for result in d:}}
 			<tr>
 				<td style="width:auto">
-					wynik1: {{=result[0]}} <br />
-					wynik2: {{=result[1]}} <br />
-					<span id="targetSpan{{=result[3]}}">wynik3: <span id="result{{=result[3]}}">{{=result[2]}}</span></span>
+					init1: {{=result[0]}} <br />
+					initN: {{=result[1]}} <br />
+					<span id="targetSpan{{=result[3]}}">opt: <span id="result{{=result[3]}}">{{=result[2]}}</span></span>
 				</td>
 				<td>
 					<span>{{=db[result[3]][:(result[4])]}}</span><span style="color:green"><strong>{{=db[result[3]][(result[4]):(result[4]+result[5])]}}</strong></span><span>{{=db[result[3]][(result[4]+result[5]):]}}</span>
 					
 					
 				</td>
-				<td>
-					Błędy: {{=result[6]}}
+				<td style="width:auto">
+					Rozbieżności: {{=result[6]}}
 				</td>
 			</tr>
 			{{pass}}
@@ -107,3 +107,5 @@
 			{{pass}}
 		</div>
 	</div>
+
+<input type="hidden" id="count" value="{{=len(d)}}">
