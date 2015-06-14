@@ -4,7 +4,7 @@
 
 <div class="container-fluid">
 
-     <h1>Algorytm FASTA</h1>
+     <h1>Algorytm FASTA <span class="glyphicon glyphicon-flash"></span></h1>
 <br />
 	
 	
@@ -79,9 +79,9 @@
 <br />
 		</div>
 		<div class="col-md-6">
-			{{if len(d) > 0:}}
+			{{if len(d) > 1:}}
 			
-			<table class="table table-bordered outputTable">
+			<table id="fastaTable" class="table table-bordered outputTable">
 				
 			
 			
@@ -104,6 +104,8 @@
 			{{pass}}
 			</table>
 	
+			{{elif len(d)==1:}}
+				<span>Brak wyników dla podanych parametrów!</span>
 			{{pass}}
 		</div>
 	</div>

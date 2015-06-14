@@ -22,6 +22,11 @@ table.algorithmMatrix {
     width:400px;
 }
 
+table#fastaTable.outputTable.table.table-bordered>tbody>tr>td{
+		vertical-align:middle;
+		text-align:center;
+}
+
 table.algorithmMatrix th{
     background-color:#5cb85c;
 	
