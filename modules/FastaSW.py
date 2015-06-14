@@ -59,7 +59,6 @@ def createScoreMatrix(seq, seqRef, penalty, match, mismatch, path, k):
     '''
     rows=len(seq)+1
     cols=len(seqRef)+1
-
     #initialize the matrix with 0
     scoreMatrix = [[0 for col in range(cols)] for row in range(rows)]
 
@@ -75,7 +74,6 @@ def createScoreMatrix(seq, seqRef, penalty, match, mismatch, path, k):
                 bestPos   = (i, j)
 
             scoreMatrix[i][j] = score
-
     assert bestPos is not None, 'position with the highest score not found'
     return scoreMatrix, bestPos
 
@@ -88,54 +86,11 @@ def calcScore(seq, seqRef, matrix, i, j, penalty, match, mismatch, k, path):
     similarity=match if seq[i-1]==seqRef[j-1] else mismatch
 
     #check bounds
-    diagScore = matrix[i - 1][j - 1] + similarity if isWithinBounds(i-1,j-1, k, path) else 0    
-    upScore   = matrix[i - 1][j] + penalty if isWithinBounds(i-1,j, k, path) else 0  
-    leftScore = matrix[i][j - 1] + penalty if isWithinBounds(i,j-1, k, path) else 0  
+    diagScore = matrix[i - 1][j - 1] + similarity if isWithinBounds(i-1,j-1, k, path) else -1    
+    upScore   = matrix[i - 1][j] + penalty if isWithinBounds(i-1,j, k, path) else -1  
+    leftScore = matrix[i][j - 1] + penalty if isWithinBounds(i,j-1, k, path) else -1  
 
     return max(0, diagScore, upScore, leftScore)
-
-
-def calcStep(steps, seq, seqRef, matrix, i, j, penalty, match, mismatch):
-    '''Calculate score for a given position in the scoring matrix.
-
-    The score is based on the up, left, and upper-left neighbors.
-	best index can take on following values:
-		0 - diag
-		1 - left
-		2 - up
-		3 - zero
-    '''
-    #print "steps: ", steps
-    nextStep=[]
-    possibilities=[]
-    bestIndex=0
-    similarity=match if seq[i-1]==seqRef[j-1] else mismatch
-
-    diag = [matrix[i - 1][j - 1] + similarity, i-1, j-1]
-    possibilities.append(diag)
-
-    up = [matrix[i - 1][j] + penalty, i-1, j]
-    possibilities.append(up)
-    if(up[0]>diag[0]):
-        bestIndex=1
-
-    left = [matrix[i][j - 1] + penalty, i, j-1]
-    possibilities.append(left)
-
-    zero =[0, -1, -1]
-    possibilities.append(zero)
-
-    if left[0]>up[0] and left[0]>diag[0]:
-        bestIndex=2
-
-    if possibilities[bestIndex][0]<0:
-        bestIndex=3
-
-    #print "possi[best]=",bestIndex, " ___________", diag, up, left
-    best=possibilities[bestIndex]
-    steps.append([bestIndex, best[1], best[2],  possibilities[0][0], possibilities[1][0], possibilities[2][0]])
-
-    return steps, possibilities[bestIndex][0]
 
 
 def traceback(scoreMatrix, startPos, seq, seqRef, penalty, match, mismatch):
@@ -160,7 +115,6 @@ def traceback(scoreMatrix, startPos, seq, seqRef, penalty, match, mismatch):
     step,newscore   = nextStep(scoreMatrix, i, j, seq, seqRef, penalty, match, mismatch,score )
 
     while step != END:
-        #print (i,j), "score=", score
         if step == DIAG:
             alignedSeq.append(seq[i - 1])
             alignedSeqRef.append(seqRef[j - 1])
@@ -212,36 +166,6 @@ def nextStep(scoreMatrix, i, j, seq, seqRef, penalty, match, mismatch,score ):
         raise ValueError('invalid move during traceback')"""
 
 
-def createAlignmentString(alignedSeq, alignedSeqRef):
-    '''Construct a special string showing identities, gaps, and mismatches.
-
-    This string is printed between the two aligned sequences and shows the
-    identities (|), gaps (-), and mismatches (:). As the string is constructed,
-    it also counts number of identities, gaps, and mismatches and returns the
-    counts along with the alignment string.
-
-    AAGGATGCCTCAAATCGATCT-TTTTCTTGG-
-    ::||::::::||:|::::::: |:  :||:|   <-- alignment string
-    CTGGTACTTGCAGAGAAGGGGGTA--ATTTGG
-    '''
-    # Build the string as a list of characters to avoid costly string
-    # concatenation.
-    idents, gaps, mismatches = 0, 0, 0
-    alignmentString = []
-    for base1, base2 in zip(alignedSeq, alignedSeqRef):
-        if base1 == base2:
-            alignmentString.append('|')
-            idents += 1
-        elif '-' in (base1, base2):
-            alignmentString.append(' ')
-            gaps += 1
-        else:
-            alignmentString.append(':')
-            mismatches += 1
-
-    return ''.join(alignmentString), idents, gaps, mismatches
-
-
 def print_matrix(matrix):
     '''Print the scoring matrix.
 
@@ -286,37 +210,38 @@ class ScoreMatrixTest(unittest.TestCase):
 
 def printMatrix(matrix,seq, seqRef):
     #print ref sequence's nukleotides
+    f=open('SW_Debug.txt', 'w+')
     rows=len(seq)
     cols=len(seqRef)
-    print
-    print"         ",
+    print >>f
+    print >>f, "         ",
     for n in range(cols):
-        print seqRef[n], "  ",
-    print
+        print >>f, seqRef[n], "  ",
+    print >>f
     i=0
     for row in matrix:
         if(row>0):
-            print seq[i-1],
+            print >>f,  seq[i-1],
         else:
-            print "    ",
+            print >>f, "    ",
         i+=1
         for col in row:
             #if col!=0:
-            print ('{0:>4}'.format(col)),
+            print >>f, ('{0:>4}'.format(col)),
             #else:
                # print "    ",
-        print
+        print >>f
 
 
 def SmithWaterman(seq, seqRef, path, k, penalty=-5, match=1, mismatch=-1):
     rows=len(seq)+1
     cols=len(seqRef)+1
-  
     matrix, bestPos = createScoreMatrix(seq, seqRef, penalty, match, mismatch, path, k)
 
     # Traceback. Find the optimal path through the scoring matrix. This path
     # corresponds to the optimal local sequence alignment.
     seqAligned, seqRefAligned, score, alignedSeqRefStartIndex = traceback(matrix, bestPos, seq, seqRef, penalty, match, mismatch)
+    #printMatrix(matrix, seq, seqRef)#to File
     assert len(seqAligned) == len(seqRefAligned), 'aligned strings are not the same size'
     return matrix, seqAligned, seqRefAligned,score, alignedSeqRefStartIndex
 

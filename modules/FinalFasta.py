@@ -241,7 +241,7 @@ def rescoreDiagonals(seq, seqRef, blosum, bestDiagonalsDict,k, cutoff):
 	#remove diagonals with scores below a cutoff threshold
 	bestRescoredDiagonals=dict(rescoredDiagonals)
 	
-	
+
 	for diag in bestDiagonalsDict:
 		for region in bestDiagonalsDict[diag]:
 			if region.value<cutoff:
@@ -251,10 +251,10 @@ def rescoreDiagonals(seq, seqRef, blosum, bestDiagonalsDict,k, cutoff):
 					del bestRescoredDiagonals[diag]
 			
 
-	
+	init1=None
 	rescoredRegions=listAllRegions(bestRescoredDiagonals)
-	print "len=", len(bestRescoredDiagonals)
-	init1=max(rescoredRegions)
+	if len(bestRescoredDiagonals)>0:
+		init1=max(rescoredRegions)
 
 	return bestRescoredDiagonals, init1
 
@@ -353,8 +353,7 @@ def fastaScoreAlignment(seq, seqRef, k, gapPenalty=-10, rescoreCutoff=10, matchR
 	#print "\n=======================================\n                STEP3\n=======================================\n"
 	diagonalRegionsDict, init1=rescoreDiagonals(seq, seqRef, blosum, bestTenDiagonalRunsDict,k, rescoreCutoff)
 
-	if len(diagonalRegionsDict)==0:
-		print "Step 3 error"
+	if init1==None or len(diagonalRegionsDict)==0:
 		return 0
 	
 	#4. Join initial regions using gaps (create a graph), penalise for gaps
@@ -362,21 +361,23 @@ def fastaScoreAlignment(seq, seqRef, k, gapPenalty=-10, rescoreCutoff=10, matchR
 				
 	mygraph=graph.createGraph(listAllRegions(diagonalRegionsDict), -1)
 	
-	if mygraph==None:
-		regions=listAllRegions(diagonalRegionsDict)
-		init_n=max(regions)
-		
+	init_n=None
 	path=[]
 	value=0
 	allPaths=[]
-	for startNode in mygraph:
-		for node in mygraph[startNode]:
-			path, value=graph.findBestPath(mygraph, startNode, node[0])
-			if path:
-				allPaths.append([value,path])
-				
-	allPaths.sort(reverse=True)
-	init_n=allPaths[0]
+	if mygraph==None:
+		regions=listAllRegions(diagonalRegionsDict)
+		init_n=max(regions).value	
+	else:	
+		
+		for startNode in mygraph:
+			for node in mygraph[startNode]:
+				path, value=graph.findBestPath(mygraph, startNode, node[0])
+				if path:
+					allPaths.append([value,path])
+					
+		allPaths.sort(reverse=True)
+		init_n=allPaths[0][0]
 	
 	
 		
@@ -385,7 +386,7 @@ def fastaScoreAlignment(seq, seqRef, k, gapPenalty=-10, rescoreCutoff=10, matchR
 	matrix, seqAligned, seqRefAligned,opt_score, alignedSeqRefStartIndex=FastaSW.SmithWaterman(seq, seqRef, init1.hotspots, k, gapPenalty)
 
 	
-	return init1.value, init_n[0], opt_score, seqAligned, seqRefAligned, alignedSeqRefStartIndex, len(seqRefAligned)
+	return init1.value, init_n, opt_score, seqAligned, seqRefAligned, alignedSeqRefStartIndex, len(seqRefAligned)
 	
 def readDb(fname):
 	lines = open(fname, "rt").readlines()
@@ -409,6 +410,4 @@ def fasta(seq, k=2, gapPenalty=-10, rescoreCutoff=10, matchReward=20, db=[], blo
 		astring, idents, gaps, mismatched=createAlignmentString(seqAligned, seqRefAligned)
 		answer.append([init1, init_n, opt, i, refStartIndex, length, mismatched])
 		
-		
 	return answer
-	

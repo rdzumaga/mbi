@@ -87,7 +87,7 @@ def createGraph(subregions, gapPenalty):
 					connections.append((v, u, -dist))
 	
 	graph={}
-
+	
 	if len(connections)==0:
 		return None
 	
