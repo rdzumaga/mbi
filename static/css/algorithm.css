@@ -22,7 +22,7 @@ table.algorithmMatrix {
     width:400px;
 }
 
-table#fastaTable.outputTable.table.table-bordered>tbody>tr>td{
+#fastaTable.table.table-bordered>tbody>tr>td{
 		vertical-align:middle;
 		text-align:center;
 }

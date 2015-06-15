@@ -89,6 +89,10 @@
 			
 			{{for result in d:}}
 			<tr>
+				{{if len(result) == 1:}}
+				<td colspan="3"><strong>Brak dopasowania dla fragmentu:</strong><br />{{=db[result[0]]}}</td>
+				
+				{{else:}}
 				<td style="width:auto">
 					init1: {{=result[0]}} <br />
                     <span id="targetSpan{{=result[3]}}">initN: <span id="result{{=result[3]}}">{{=result[1]}}</span></span><br />
@@ -102,6 +106,10 @@
 				<td style="width:auto">
 					Rozbieżności: {{=result[6]}}
 				</td>
+				{{pass}}
+			
+			
+				
 			</tr>
 			{{pass}}
 			</table>

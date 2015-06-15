@@ -108,7 +108,16 @@ def fasta():
 
     if form.accepts(request.vars, session, keepvalues=True):
         penalty=int(request.vars.break_penalty)
-        d=FinalFasta.fasta(request.vars.seq)
+        length=int(request.vars.length)
+        breakpen=int(request.vars.break_penalty)
+        treshold=int(request.vars.threshold_c)
+        matchval=int(request.vars.match)
+        print penalty
+        print length
+        print breakpen
+        print treshold
+        print matchval
+        d=FinalFasta.fasta(request.vars.seq,length,breakpen,treshold,matchval)
 
 
     return dict(form=form, d=d, db=db)
