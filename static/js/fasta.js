@@ -147,23 +147,29 @@ function removeWarning(seq) {
 }
 
 function showMaxResult(){
-    var i = findMaxResult();
-    if(i){
-        var id = "targetSpan"+i;
-        document.getElementById(id).className = "bestResult";
+    var idList = findMaxResult();
+    if(idList){
+        for	(index = 0; index < idList.length; index++) {
+                var id = "targetSpan"+idList[index];
+                document.getElementById(id).className = "bestResult";
+        }
     }
 }
 
 function findMaxResult() {
     var count =  document.getElementById("count").value;
     var tempVal = 0;
-    var tempValId;
+    var tempValId = [];
     for(i=0; i<parseInt(count); ++i){
     var id = "result" + i;
      var val = document.getElementById(id).innerText;
-        if (parseInt(val)>tempVal){
+        if (parseInt(val)>=tempVal){
+
+            if (parseInt(val)>tempVal){
+                tempValId.length = 0;
+            }
             tempVal = parseInt(val);
-            tempValId = i;
+            tempValId.push(i);
         }
     }
     return tempValId;
