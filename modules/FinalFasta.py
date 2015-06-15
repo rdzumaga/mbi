@@ -125,7 +125,6 @@ def listAllRegions(diagonalRegionsDict):
 		#diagonalRegionsDict[diag].printIt() 
 		for region in diagonalRegionsDict[diag]:
 			regions.append(region)
-	print
 	return regions
 	
 def getDictWithTopRegions(diagonals):	
@@ -342,7 +341,7 @@ def fastaScoreAlignment(seq, seqRef, k, gapPenalty=-10, rescoreCutoff=10, matchR
 	diagonalDict=calcDiagonalSums(seq, seqRef, tuplesRef,tuplesRefDict, k)
 	if len(diagonalDict)==0:
 		print "step1 error"
-		return 0
+		return -1, 0, 0, "", "", 0, 0
 		
 	# 2 Score diagonals with k-word matches and identify 10 best diagonals
 	#save the 10 best local regions, regardless of whether they are on the same of different diagonals.
@@ -354,7 +353,8 @@ def fastaScoreAlignment(seq, seqRef, k, gapPenalty=-10, rescoreCutoff=10, matchR
 	diagonalRegionsDict, init1=rescoreDiagonals(seq, seqRef, blosum, bestTenDiagonalRunsDict,k, rescoreCutoff)
 
 	if init1==None or len(diagonalRegionsDict)==0:
-		return 0
+		print "step 3 error"
+		return -1, 0, 0, "", "", 0, 0
 	
 	#4. Join initial regions using gaps (create a graph), penalise for gaps
 	#print "\n======================================="                STEP4\n=======================================\n"
@@ -389,6 +389,9 @@ def fastaScoreAlignment(seq, seqRef, k, gapPenalty=-10, rescoreCutoff=10, matchR
 	return init1.value, init_n, opt_score, seqAligned, seqRefAligned, alignedSeqRefStartIndex, len(seqRefAligned)
 	
 def readDb(fname):
+	"""
+	Method for reading reference sequences from a file to an array
+	"""
 	lines = open(fname, "rt").readlines()
 	db=[]
 	for line in lines:
@@ -397,6 +400,9 @@ def readDb(fname):
 	return db
 	
 def fasta(seq, k=2, gapPenalty=-10, rescoreCutoff=10, matchReward=20, db=[], blosum="" ):
+	"""
+	Method searching a database of reference DNA sequences 
+	"""
 	if len(db)==0:
 		db=readDb("db.txt")
 	
@@ -408,6 +414,11 @@ def fasta(seq, k=2, gapPenalty=-10, rescoreCutoff=10, matchReward=20, db=[], blo
 		init1, init_n, opt, seqAligned, seqRefAligned, refStartIndex, length=fastaScoreAlignment(seq, db[i], k, gapPenalty, rescoreCutoff, matchReward, blosum)
 		
 		astring, idents, gaps, mismatched=createAlignmentString(seqAligned, seqRefAligned)
-		answer.append([init1, init_n, opt, i, refStartIndex, length, mismatched])
+		if init1>=0:
+			answer.append([init1, init_n, opt, i, refStartIndex, length, mismatched])
+		else:
+			answer.appand(i)
+		
 		
 	return answer
+	
