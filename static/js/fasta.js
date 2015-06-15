@@ -162,14 +162,17 @@ function findMaxResult() {
     var tempValId = [];
     for(i=0; i<parseInt(count); ++i){
     var id = "result" + i;
-     var val = document.getElementById(id).innerText;
-        if (parseInt(val)>=tempVal){
+     var value = document.getElementById(id);
+        if (value){
+            var val = value.innerText;
+            if (parseInt(val)>=tempVal){
 
-            if (parseInt(val)>tempVal){
-                tempValId.length = 0;
+                if (parseInt(val)>tempVal){
+                    tempValId.length = 0;
+                }
+                tempVal = parseInt(val);
+                tempValId.push(i);
             }
-            tempVal = parseInt(val);
-            tempValId.push(i);
         }
     }
     return tempValId;
