@@ -80,8 +80,10 @@
 		</div>
 		<div class="col-md-6">
 			{{if len(d) > 1:}}
-			
-			<table id="fastaTable" class="table table-bordered outputTable">
+			<H3>
+                Wyniki dopasowań: </br>
+            </H3>
+			<table id="fastaTable" class="table table-bordered table-bordered table-condensed table-hover table-striped">
 				
 			
 			
@@ -93,7 +95,7 @@
 					<span id="targetSpan{{=result[3]}}">opt: <span id="result{{=result[3]}}">{{=result[2]}}</span></span>
 				</td>
 				<td>
-					<span>{{=db[result[3]][:(result[4])]}}</span><span style="color:green"><strong>{{=db[result[3]][(result[4]):(result[4]+result[5])]}}</strong></span><span>{{=db[result[3]][(result[4]+result[5]):]}}</span>
+					<span>{{=db[result[3]][:(result[4])]}}</span><span style="color:#8AC007; text-decoration: underline;"><strong>{{=db[result[3]][(result[4]):(result[4]+result[5])]}}</strong></span><span>{{=db[result[3]][(result[4]+result[5]):]}}</span>
 					
 					
 				</td>
