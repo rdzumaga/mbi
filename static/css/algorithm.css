@@ -42,9 +42,9 @@ box-shadow:         5px 5px 5px 0px rgba(50, 50, 50, 0.75);
 }
 
 span.bestResult {
-    color: red;
+    color: #449d44;
     font-weight: bold;
-    border: 2px solid red;;
+    border: 2px solid #449d44;;
 }
 
 #stepTable.outputTable.greenTable th,td {
