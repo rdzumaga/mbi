@@ -22,7 +22,8 @@ def readBlosum(fname):
 
 def getTuplesList(str,k):
 	"""
-	Find k-length tuples of strings in provided DNA sequence
+	Find k-length tuples of characters (nucleotides) in the DNA sequence provided.
+	@retval a tuple containg (set of tuples, dictionary with tuples as key and empty array for item)
 	"""
 	tuples=set()
 	tuplesDict={}
@@ -58,6 +59,16 @@ def createDiagonalDictFrom(bestDiagonals):
 	return newDict	
 		
 def calcDiagonalSums(seq, seqRef,tuplesRef, tuplesRefDict,k):
+	"""
+	Create a dictionary where each diagonal get assigned an array containg one diagonal run object storing all hotspots found on that diagonal
+	@param	seq 				Query sequence which will be compared against a reference sequence
+	@param	seqRef				Reference sequence
+	@param	tuplesRef			A set containing all k-length tuples found in the reference sequence	
+	@param	tuplesRefDict		Dictionary with tuples found in the reference sequence as keys and empty arrays for items
+	@param 	k					Length of tuples of nucleotides that the algorithm is looking for in any two sequences compared with each other. Should be between 2 and 6 for DNA sequences
+	
+	@retval	Dictionary with diagonals containing at least 1 hotspot
+	"""
 	diagonalDict=createDiagonalDict(seq, seqRef,k)
 	rows=len(seq)
 	cols=len(seqRef)
@@ -99,7 +110,7 @@ def createMatrixForDots(diagonalDict, seq, seqRef,k):
 		
 def printDotMatrix(seq, seqRef, matrix):
 	"""
-	Debug function for printing Dot matrix
+	Debug function for printing Dot matrix(Shouldn't be used, slows down the calculation)
 	"""
 	#print ref sequence's nukleotides
 	rows=len(seq)
@@ -109,6 +120,7 @@ def printDotMatrix(seq, seqRef, matrix):
 	for n in range(cols):
 		print seqRef[n], 
 	print
+	
 	#print sequence's nukleotides and "o" if a dot should be printed
 	for i in range(0,rows):
 		print seq[i],
@@ -120,14 +132,19 @@ def printDotMatrix(seq, seqRef, matrix):
 		print
 
 def listAllRegions(diagonalRegionsDict):
+	"""
+	Returns a list of all diagonal runs from the given diagonal dictionary
+	"""
 	regions=[]
-	for diag in diagonalRegionsDict:
-		#diagonalRegionsDict[diag].printIt() 
+	for diag in diagonalRegionsDict: 
 		for region in diagonalRegionsDict[diag]:
 			regions.append(region)
 	return regions
 	
 def getDictWithTopRegions(diagonals):	
+	"""
+	Filters the given diagonal dictionary and returns a dictionary with ten diagonal runs with best value
+	"""
 	regions=listAllRegions(diagonals)
 	if len(regions)<=10:
 		return diagonals
@@ -139,7 +156,7 @@ def getDictWithTopRegions(diagonals):
 	regions.sort(key=lambda x: x.value, reverse=True)	
 	
 	#if more multiple diagonalRuns have the same value, it is possible, that more than 10 diagonalRuns will be returned
-	topRegions=regions[0:11]
+	topRegions=regions[0:10]
 	
 	for diagNum in diagonals:
 		for region in diagonals[diagNum]:
@@ -156,10 +173,17 @@ def getDictWithTopRegions(diagonals):
 def scoreDiagonalRuns(diagonalDict, seq, seqRef,k, gapPenalty, reward):
 	"""
 	In order to evaluate each diagonal run, FASTA gives each hot spot a positive score,
-	and the space between consecutive hot spots in a run is given a negative score that
-	decreases with the increasing distance. The score of the diagonal run is the sum of the
-	hot spots scores and the interspot scores. FASTA finds the 10 highest scoring diagonal
-	runs under this evaluating scheme. Each diagonal may contain more than 1 diagonal run
+	and the space between consecutive hot spots in a run is given a negative score (gapPenalty) the score of the diagonal run is the sum of the hot spots scores and the interspot scores (only if the score with gaps is higher than without). FASTA finds the 10 highest scoring diagonal	runs under this evaluating scheme. Each diagonal may contain more than 1 diagonal run
+	
+	@param	diagonalDict	Dictionary where each diagonal (the key is the number of a diagonal, can be negative) has an array of diagonal runs associated with it
+	@param	seq 			Query sequence which will be compared against a reference sequence
+	@param	seqRef			Reference sequence
+	@param 	k				Length of tuples of nucleotides that the algorithm is looking for in any two sequences compared with each other. Should be between 2 and 6 for DNA sequences
+	@param	gapPenalty		Penalty for opening a gap. The penalty is linear. Must be negative.
+	@param	reward		Value used when scoring diagonal runs and two nucleotides. Must be positive
+	
+	@retval (Dictionary with diagonal numbers as keys and DiagonalRun objects as items, init1 (best DiagonaRun))
+	
 	"""
 	
 	rows=len(seq)
@@ -194,33 +218,30 @@ def scoreDiagonalRuns(diagonalDict, seq, seqRef,k, gapPenalty, reward):
 				regAB.add(hotspot[0], hotspot[1])
 				
 			pos=(regA.hotspots[-1][0]+1, regA.hotspots[-1][1]+1)
-			#gapPenalty=gapOpenPenalty
-			
+
 			while (pos!=regB.hotspots[0]):
-				regAB.add(pos[0],pos[1], gapPenalty)
-				
-				#make sure penalty stays a negativ value (in case there were too many consecutive gaps): for afinite penalty function
-				#if gapPenalty<-1:
-					#gapPenalty+=1
-					
+				regAB.add(pos[0],pos[1], gapPenalty)					
 				pos=(pos[0]+1, pos[1]+1)
 			
 			if regAB.value>regA.value:
 				#replace A and B with AB
 				newDiagonalDict[diag][i]=regAB
 				newDiagonalDict[diag].remove(regB)
-					
-	
-			
-	rescoredDiagonalsDict=getDictWithTopRegions(newDiagonalDict)
-	
-
-			
+								
+	rescoredDiagonalsDict=getDictWithTopRegions(newDiagonalDict)			
 	return rescoredDiagonalsDict
-
 	
 def rescoreDiagonals(seq, seqRef, blosum, bestDiagonalsDict,k, cutoff):
 	"""
+	Rescore diagonal runs
+	
+	@param	seq 				Query sequence which will be compared against a reference sequence
+	@param	seqRef				Reference sequence
+	@param	blosum				Dictionary with the substitution matrix. It uses tuples of two characters as string, e.g.: 'A', 'C'
+	@param	bestDiagonalsDict	Dictionary where each diagonal (the key is the number of a diagonal, can be negative) has an array of diagonal runs
+	@param 	k					Length of tuples of nucleotides that the algorithm is looking for in any two sequences compared with each other. Should be between 2 and 6 for DNA sequences
+	@param	cutoff				A threshold for filtering out diagonal runs with too low of a score (during rescore stage using BLOSUM matrix). Must be negative
+	
 	@retval (Dictionary with diagonal numbers as keys and DiagonalRun objects as items, init1 (best DiagonaRun))
 	"""
 	rescoredDiagonals=createDiagonalDictFrom(bestDiagonalsDict)	
@@ -256,44 +277,7 @@ def rescoreDiagonals(seq, seqRef, blosum, bestDiagonalsDict,k, cutoff):
 		init1=max(rescoredRegions)
 
 	return bestRescoredDiagonals, init1
-
-def findPathBetween(startPos, destRegion):
-		path=[]
-		dest=destRegion.hotspots[0]
-		next=(startPos[0]+1, startPos[1]+1)
-		while(next[0]<dest[0] and next[1]< dest[1]):
-			path.append(next)
-			next=(next[0]+1, next[1]+1)
-		
-		if (next!=dest):
-			di=0
-			dj=0
-			if next[0]==dest[0]:
-				next=(next[0]-1, next[1])
-				dj=1		
-			elif next[1]==dest[1]:
-				next=(next[0], next[1]-1)
-				di=1
-				
-			while(next[0]!=dest[0] and next[1]!=dest[1]):
-				path.append(next)
-				next=(next[0]+di, next[1]+dj)
-		
-		return path
-		
-def findPathWithHoles(regionsPath):
-
-	if len(regionsPath)==0:
-		return None
-	startRegion=regionsPath[0]
-	path=startRegion.hotspots
-	for region in regionsPath[1:]:
-		path+=findPathBetween(path[-1], region)
-		path+=region.hotspots
-		
-	return path	
 	
-
 def createAlignmentString(alignedSeq, alignedSeqRef):
     '''Construct a special string showing identities, gaps, and mismatches.
 
@@ -327,9 +311,26 @@ def createAlignmentString(alignedSeq, alignedSeqRef):
 
 def fastaScoreAlignment(seq, seqRef, k, gapPenalty=-10, rescoreCutoff=10, matchReward=20, blosum=""):
 	"""
+	Method calculating and scoring and alignment of two sequences using FastA algorithm
 	
-	@param	matchReward reward used when scoring initial regions. Must be positive
+	@param	seq 			Query sequence which will be compared against a reference sequence
+	@param	seqRef			Reference sequence
+	@param 	k				Length of tuples of nucleotides that the algorithm is looking for in any two sequences compared with each other. Should be between 2 and 6 for DNA sequences
+	@param	gapPenalty		Penalty for opening a gap. The penalty is linear. Must be negative.
+	@param	restoreCutoff	A threshold for filtering out diagonal runs with too low of a score (during rescore stage using BLOSUM matrix). Must be negative
+	@param	matchReward		Value used when scoring diagonal runs and two nucleotides. Must be positve
+	@param	blosum			Dictionary with the substitution matrix.
+	
+	@retval					An array containing results for comparison with the given reference sequence. The results containg:
+		init1 - best diagonal run after scoring previously found diagonal runs with substitution matrix (the diagonal run may contain mismatches)
+		init_n - best result achieved after chaining best diagonal runs (the result may contain indels and mismatches)
+		opt - result of Smith-Waterman algorithm for the init1 diagonal run
+		seqAligned - Aligned query sequence
+		seqRefAligned - Aligned reference sequence
+		refStartIndex - index of the first character in the reference sequence belonging to the alignment
+		length - length of the alignment found in the reference sequence
 	"""
+	
 	rows=len(seq)
 	cols=len(seqRef)
 	blosum=readBlosum("blosum.txt")
@@ -404,8 +405,9 @@ def fasta(seq, k=2, gapPenalty=-10, rescoreCutoff=10, matchReward=20, db=[], blo
 	Method searching a database of reference DNA sequences
 	@param	seq 			Query sequence which will be compared against reference sequences
 	@param 	k				Length of tuples of nucleotides that the algorithm is looking for in any two sequences compared with each other. Should be between 2 and 6 for DNA sequences
+	@param	gapPenalty		Penalty for opening a gap. The penalty is linear. Must be negative.
 	@param	restoreCutoff	A threshold for filtering out diagonal runs with too low of a score (during rescore stage using BLOSUM matrix). Must be negative
-	@param	matchReward		Value used when scoring diagonal runs and two nucleotides matchReward
+	@param	matchReward		Value used when scoring diagonal runs and two nucleotides. Must be positive
 	@param	db				An array containing reference sequences. In case nothing is entered for this parameter, a default database is read from a text file
 	@param	blosum			Name of the text file containing substitution matrix. In case nothing is entered, a default text file is read
 	@retval					An array of arrays containing results for comparison with each sequence from reference databas. Each sequence generates the following results:
