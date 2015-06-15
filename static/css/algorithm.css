@@ -41,6 +41,12 @@ box-shadow:         5px 5px 5px 0px rgba(50, 50, 50, 0.75);
     
 }
 
+span.bestResult {
+    color: red;
+    font-weight: bold;
+    border: 2px solid red;;
+}
+
 #stepTable.outputTable.greenTable th,td {
 
 	vertical-align:middle;

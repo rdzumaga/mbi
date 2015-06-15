@@ -4,12 +4,12 @@ function addButton() {
     btn.appendChild(t);
     document.getElementById("buttonPlace").appendChild(btn);
     btn.className = "btn btn-primary btn-lg";
-    
+    showMaxResult();
     btn.onclick = function () {
          document.getElementById("seq").value = document.getElementById("seq").value.toUpperCase();
         if (sequenceValidation()) {
             document.getElementById("myForm").submit();
-        }
+        }        
     };
 }
 
@@ -144,4 +144,27 @@ function removeWarning(seq) {
     else if (errorE){
         errorE.innerHTML="";
     }
+}
+
+function showMaxResult(){
+    var i = findMaxResult();
+    if(i){
+        var id = "targetSpan"+i;
+        document.getElementById(id).className = "bestResult";
+    }
+}
+
+function findMaxResult() {
+    var count =  document.getElementById("count").value;
+    var tempVal = 0;
+    var tempValId;
+    for(i=0; i<parseInt(count); ++i){
+    var id = "result" + i;
+     var val = document.getElementById(id).innerText;
+        if (parseInt(val)>tempVal){
+            tempVal = parseInt(val);
+            tempValId = i;
+        }
+    }
+    return tempValId;
 }
