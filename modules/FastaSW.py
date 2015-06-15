@@ -35,9 +35,9 @@ def isWithinBounds(i,j, k, rowColPath)	:
 		if col==j:
 			if i>row+k or i<row-k:
 				return False
-	
+
 	return True
-	
+
 def createScoreMatrix(seq, seqRef, penalty, match, mismatch, path, k):
     '''Create a matrix and fill it with values representing possible alignments of two sequences
 
@@ -73,9 +73,9 @@ def calcScore(seq, seqRef, matrix, i, j, penalty, match, mismatch, k, path):
     similarity=match if seq[i-1]==seqRef[j-1] else mismatch
 
     #check bounds
-    diagScore = matrix[i - 1][j - 1] + similarity if isWithinBounds(i-1,j-1, k, path) else -1    
-    upScore   = matrix[i - 1][j] + penalty if isWithinBounds(i-1,j, k, path) else -1  
-    leftScore = matrix[i][j - 1] + penalty if isWithinBounds(i,j-1, k, path) else -1  
+    diagScore = matrix[i - 1][j - 1] + similarity if isWithinBounds(i-1,j-1, k, path) else -1
+    upScore   = matrix[i - 1][j] + penalty if isWithinBounds(i-1,j, k, path) else -1
+    leftScore = matrix[i][j - 1] + penalty if isWithinBounds(i,j-1, k, path) else -1
 
     return max(0, diagScore, upScore, leftScore)
 
@@ -96,7 +96,7 @@ def traceback(scoreMatrix, startPos, seq, seqRef, penalty, match, mismatch):
     END, DIAG, UP, LEFT = range(4)
     alignedSeq = []
     alignedSeqRef = []
-	
+
     i, j         = startPos
 
     step,newscore   = nextStep(scoreMatrix, i, j, seq, seqRef, penalty, match, mismatch,score )
@@ -115,9 +115,9 @@ def traceback(scoreMatrix, startPos, seq, seqRef, penalty, match, mismatch):
             alignedSeq.append('-')
             alignedSeqRef.append(seqRef[j - 1])
             j -= 1
-        
+
         step,score = nextStep(scoreMatrix, i, j, seq, seqRef, penalty, match, mismatch,newscore)
-		
+
 	alignedSeqRefStartIndex=j
     return ''.join(reversed(alignedSeq)), ''.join(reversed(alignedSeqRef)), score, alignedSeqRefStartIndex
 
@@ -125,15 +125,15 @@ def traceback(scoreMatrix, startPos, seq, seqRef, penalty, match, mismatch):
 def nextStep(scoreMatrix, i, j, seq, seqRef, penalty, match, mismatch,score ):
     if(i==0 or j==0):
         return 0, score
-	
+
     val=scoreMatrix[i][j]
     diag = scoreMatrix[i - 1][j - 1]
     up   = scoreMatrix[i - 1][j]
     left = scoreMatrix[i][j - 1]
 
-	
+
     similarity=match if seq[i-1]==seqRef[j-1] else mismatch
-		
+
     if(val==diag+similarity):
         return 1, score+scoreMatrix[i][j]
     if (val==up+penalty):
@@ -187,8 +187,10 @@ def printMatrix(matrix,seq, seqRef):
 
 
 def SmithWaterman(seq, seqRef, path, k, penalty=-5, match=1, mismatch=-1):
-	"""!@brief	A modified version of Smith-Waterman algorithm for use with FastA
-	"""
+    """
+    !@brief	A modified version of Smith-Waterman algorithm for use with FastA
+    """
+
     rows=len(seq)+1
     cols=len(seqRef)+1
     matrix, bestPos = createScoreMatrix(seq, seqRef, penalty, match, mismatch, path, k)
