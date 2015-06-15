@@ -327,7 +327,7 @@ def fastaScoreAlignment(seq, seqRef, k, gapPenalty=-10, rescoreCutoff=10, matchR
 	
 	rows=len(seq)
 	cols=len(seqRef)
-	blosum=readBlosum("blosum.txt")
+	blosum=readBlosum("applications/mbi/modules/blosum.txt")
 	
 	#1.identify common k-words between I (seq) and J(seqRef)
 	tuplesRef,tuplesRefDict=getTuplesList(seqRef,k)
@@ -414,10 +414,10 @@ def fasta(seq, k=2, gapPenalty=-10, rescoreCutoff=10, matchReward=20, db=[], blo
 	"""
 	
 	if len(db)==0:
-		db=readDb("db.txt")
+		db=readDb("applications/mbi/modules/db.txt")
 	
 	if len(blosum)==0:
-		blosum=readBlosum("blosum.txt")
+		blosum=readBlosum("applications/mbi/modules/blosum.txt")
 	
 	answer=[]
 	for i in range(len(db)):
