@@ -91,8 +91,8 @@
 			<tr>
 				<td style="width:auto">
 					init1: {{=result[0]}} <br />
-					initN: {{=result[1]}} <br />
-					<span id="targetSpan{{=result[3]}}">opt: <span id="result{{=result[3]}}">{{=result[2]}}</span></span>
+                    <span id="targetSpan{{=result[3]}}">initN: <span id="result{{=result[3]}}">{{=result[1]}}</span></span><br />
+					opt: {{=result[2]}}
 				</td>
 				<td>
 					<span>{{=db[result[3]][:(result[4])]}}</span><span style="color:#8AC007; text-decoration: underline;"><strong>{{=db[result[3]][(result[4]):(result[4]+result[5])]}}</strong></span><span>{{=db[result[3]][(result[4]+result[5]):]}}</span>
