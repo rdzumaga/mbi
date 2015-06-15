@@ -72,8 +72,7 @@ def smithWaterman():
                 mismatchint = int(request.vars.mismatch)
                 d=SW.SmithWaterman(iterx, request.vars.seqA,request.vars.seqB, penalty, matchint, mismatchint)
 
-            if len(d) > 0:
-                print d[0]
+
 
             return dict(form=form, d=d)
 
@@ -112,11 +111,6 @@ def fasta():
         breakpen=int(request.vars.break_penalty)
         treshold=int(request.vars.threshold_c)
         matchval=int(request.vars.match)
-        print penalty
-        print length
-        print breakpen
-        print treshold
-        print matchval
         d=FinalFasta.fasta(request.vars.seq,length,breakpen,treshold,matchval)
 
 
