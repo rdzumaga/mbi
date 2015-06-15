@@ -1,9 +1,11 @@
+"""!@package FastaSW
+Find the best match between query sequence and reference sequences from a database
+"""
+
 import argparse
 import os
 import re
 import sys
-import unittest
-
 
 # Create an empty matrix
 def create_matrix(m, n):
@@ -24,21 +26,6 @@ def readBlosum(fname):
             d[(a1, a2)] = int(score)
     return d
 
-
-seq02= "GAAAGAT" #horizontal
-seq01 = "GATGAA"#vertical
-#seqRef= "GGCTCAATCA"
-#seq= "ACCTAAGG"
-#seq = 'AGCACACA'
-#seqRef = 'ACACACTA'
-seq02 = "FTFTALILLAVAV"
-seq01 = "FTALLLAAV"
-
-
-seq02= "CGTGAATTCAT" #horizontal
-seq01 = "GACTTAC"#vertical
-
-#---------------functions--------------------
 
 def isWithinBounds(i,j, k, rowColPath)	:
 	for row, col in rowColPath:
@@ -156,15 +143,6 @@ def nextStep(scoreMatrix, i, j, seq, seqRef, penalty, match, mismatch,score ):
 
     return 0, score+scoreMatrix[i][j]
 
-"""    if diag >= up and diag >= left:     # Tie - DIAG step "wins".
-        return 1 if diag != 0 else 0    # 1 signals a DIAG step. 0 signals the end.
-    elif up > diag and up >= left:      # Tie -  UP step"wins".
-        return 2 if up != 0 else 0      # UP step or end.
-    elif left > diag and left > up:
-        return 3 if left != 0 else 0    # LEFT step or end.
-    else:
-        raise ValueError('invalid move during traceback')"""
-
 
 def print_matrix(matrix):
     '''Print the scoring matrix.
@@ -181,31 +159,6 @@ def print_matrix(matrix):
         for col in row:
             print('{0:>4}'.format(col)),
         print
-
-
-class ScoreMatrixTest(unittest.TestCase):
-    '''Compare the matrix produced by create_score_matrix() with a known matrix.'''
-    def test_matrix(self):
-        # From Wikipedia (en.wikipedia.org/wiki/Smith%E2%80%93Waterman_algorithm)
-        #                -   A   C   A   C   A   C   T   A
-        knownMatrix = [[0,  0,  0,  0,  0,  0,  0,  0,  0],  # -
-                        [0,  2,  1,  2,  1,  2,  1,  0,  2],  # A
-                        [0,  1,  1,  1,  1,  1,  1,  0,  1],  # G
-                        [0,  0,  3,  2,  3,  2,  3,  2,  1],  # C
-                        [0,  2,  2,  5,  4,  5,  4,  3,  4],  # A
-                        [0,  1,  4,  4,  7,  6,  7,  6,  5],  # C
-                        [0,  2,  3,  6,  6,  9,  8,  7,  8],  # A
-                        [0,  1,  4,  5,  8,  8, 11, 10,  9],  # C
-                        [0,  2,  3,  6,  7, 10, 10, 10, 12]]  # A
-
-        global seq, seqRef
-        seq = 'AGCACACA'
-        seqRef = 'ACACACTA'
-        rows = len(seq) + 1
-        cols = len(seqRef) + 1
-
-        matrixToTestest, bestPos = createScoreMatrix(rows, cols)
-        self.assertEqual(knownMatrix, matrixToTest)
 
 
 def printMatrix(matrix,seq, seqRef):
@@ -234,6 +187,8 @@ def printMatrix(matrix,seq, seqRef):
 
 
 def SmithWaterman(seq, seqRef, path, k, penalty=-5, match=1, mismatch=-1):
+	"""!@brief	A modified version of Smith-Waterman algorithm for use with FastA
+	"""
     rows=len(seq)+1
     cols=len(seqRef)+1
     matrix, bestPos = createScoreMatrix(seq, seqRef, penalty, match, mismatch, path, k)

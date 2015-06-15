@@ -1,16 +1,17 @@
+"""!@package NW
+Find the global alignment using Needleman-Wunsch algorithm
+"""
 
 # Create an empty matrix
 def createMatrix(rows, cols):
-    """
-    initialize matrix with 0
+    """!@brief initialize matrix with 0
     """
 	
     return [[0]*cols for _ in xrange(rows)]
 
 # Read BLOSUM table
 def readBlosum(fname):
-    """
-    Read from file the Blosum table
+    """!@brief Read from file the Blosum table
     """
 	
     #dictionary holding pairs of nucleotides and their BLOSUM matrix value, e.g.: ('T', 'A'): -4
@@ -26,8 +27,7 @@ def readBlosum(fname):
     return d
 
 def createScoreMatrix(seq, seqRef, blosum, penalty):
-    '''
-    Create a matrix and fill it with values representing possible alignments of two sequences
+    '''!@brief	Create a matrix and fill it with values representing possible alignments of two sequences
 
     Best alignment can be found by locating a path in the matrix with highest cumulative score.
 
@@ -59,8 +59,7 @@ def createScoreMatrix(seq, seqRef, blosum, penalty):
     return F
 
 def calcMatrixStepByStep(seq, seqRef, blosum, penalty, step):
-    """
-    Calculate the score matrix until idicated step is reached
+    """!@brief	Calculate the score matrix until idicated step is reached
 
     Parameters:
     @param  seq	    	String representing query DNA sequency
@@ -126,7 +125,7 @@ def calcMatrixStepByStep(seq, seqRef, blosum, penalty, step):
     return steps
 
 def traceback(scoreMatrix, startPos, seq, seqRef, penalty, blosum):
-    '''Find the optimal path through the matrix representing the alignment.
+    '''!@brief Find the optimal path through the matrix representing the alignment.
 
     Starting from the best position (bottom right of a path), trace the whole path
     back up (top-left corner), finding thus the best local alignment. Each step of the path (matrix cell)
@@ -171,8 +170,7 @@ def traceback(scoreMatrix, startPos, seq, seqRef, penalty, blosum):
     return ''.join(reversed(alignedSeq)), ''.join(reversed(alignedSeqRef))
 
 def nextStep(seq, seqRef, scoreMatrix, i, j, blosum, penalty):
-    """
-	Calculate next step in the tracedback path
+    """!@brief	Calculate next step in the tracedback path
 	
 	Return:
 		1 - diagonal step
@@ -198,7 +196,7 @@ def nextStep(seq, seqRef, scoreMatrix, i, j, blosum, penalty):
         return 3
 
 def createAlignmentString(alignedSeq, alignedSeqRef):
-    '''Construct a special string showing identities, gaps, and mismatches.
+    '''!@brief	Construct a special string showing identities, gaps, and mismatches.
 
     This string is printed between the two aligned sequences and shows the
     identities (|), gaps (-), and mismatches (:). As the string is constructed,
@@ -228,8 +226,7 @@ def createAlignmentString(alignedSeq, alignedSeqRef):
     return ''.join(alignmentString), idents, gaps, mismatches
 
 def needlemanWunsch(step=-1, seq="GATTA", seqRef="GAATTC", penalty=-5, blosumFile="blosum.txt"):
-    """
-    Method calculating global alignment of two sequences.
+    """!@brief	Method calculating global alignment of two sequences.
 
     @param  step	number of steps to take when calculating the score matrix. Each step move from cell F[i][j] to cell F[i][j+1] or F[i+1][0] when reached the end of a row. If step<0, the whole algorithm is executed, along with string alignements
     @param  seq	        string representing query DNA sequency

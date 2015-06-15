@@ -1,11 +1,13 @@
+"""!@package FinalFasta
+Find the best match between query sequence and reference sequences from a database
+"""
+
 import graph
 import copy
 import FastaSW
 
-# Read BLOSUM table
 def readBlosum(fname):
-    """
-    Read from file the Blosum table
+    """!@brief	Read from file the Blosum table
     """
 	
     #dictionary holding pairs of nucleotides and their BLOSUM matrix value, e.g.: ('T', 'A'): -4
@@ -21,8 +23,7 @@ def readBlosum(fname):
     return d
 
 def getTuplesList(str,k):
-	"""
-	Find k-length tuples of characters (nucleotides) in the DNA sequence provided.
+	"""!@brief	Find k-length tuples of characters (nucleotides) in the DNA sequence provided.
 	@retval a tuple containg (set of tuples, dictionary with tuples as key and empty array for item)
 	"""
 	tuples=set()
@@ -39,8 +40,7 @@ def getTuplesList(str,k):
 	return tuples,tuplesDict
 
 def createDiagonalDict(seq, seqRef,k):
-	"""
-	Create a dict with diagonal num as key and an array with one empty DiagonalRun object as value
+	"""!@brief	Create a dict with diagonal num as key and an array with one empty DiagonalRun object as value
 	"""
 	rows=len(seq)
 	cols=len(seqRef)
@@ -53,14 +53,15 @@ def createDiagonalDict(seq, seqRef,k):
 	return diagonalIndexDict
 
 def createDiagonalDictFrom(bestDiagonals):
+	"""!@brief Create an empty dictionary with keys copied from the dictionary taken from function parameter
+	"""
 	newDict=dict(bestDiagonals)
 	for diag in bestDiagonals:
 		newDict[diag]=[]
 	return newDict	
 		
 def calcDiagonalSums(seq, seqRef,tuplesRef, tuplesRefDict,k):
-	"""
-	Create a dictionary where each diagonal get assigned an array containg one diagonal run object storing all hotspots found on that diagonal
+	"""!@brief	Create a dictionary where each diagonal get assigned an array containg one diagonal run object storing all hotspots found on that diagonal
 	@param	seq 				Query sequence which will be compared against a reference sequence
 	@param	seqRef				Reference sequence
 	@param	tuplesRef			A set containing all k-length tuples found in the reference sequence	
@@ -89,8 +90,7 @@ def calcDiagonalSums(seq, seqRef,tuplesRef, tuplesRefDict,k):
 	return goodDiagonalDict
 
 def createMatrixForDots(diagonalDict, seq, seqRef,k):
-	"""
-	Debug function creating a scoreMatrix for seq and seqRef. Drawing dot matrix is unnecessary since it takes too much memory to remember all values
+	"""!@brief	Debug function creating a scoreMatrix for seq and seqRef. Drawing dot matrix is unnecessary since it takes too much memory to remember all values
 	"""
 	rows=len(seq)
 	cols=len(seqRef)
@@ -109,8 +109,7 @@ def createMatrixForDots(diagonalDict, seq, seqRef,k):
 	return scoreMatrix
 		
 def printDotMatrix(seq, seqRef, matrix):
-	"""
-	Debug function for printing Dot matrix(Shouldn't be used, slows down the calculation)
+	"""!@brief	Debug function for printing Dot matrix(Shouldn't be used, slows down the calculation)
 	"""
 	#print ref sequence's nukleotides
 	rows=len(seq)
@@ -132,8 +131,7 @@ def printDotMatrix(seq, seqRef, matrix):
 		print
 
 def listAllRegions(diagonalRegionsDict):
-	"""
-	Returns a list of all diagonal runs from the given diagonal dictionary
+	"""!@brief	Returns a list of all diagonal runs from the given diagonal dictionary
 	"""
 	regions=[]
 	for diag in diagonalRegionsDict: 
@@ -142,8 +140,7 @@ def listAllRegions(diagonalRegionsDict):
 	return regions
 	
 def getDictWithTopRegions(diagonals):	
-	"""
-	Filters the given diagonal dictionary and returns a dictionary with ten diagonal runs with best value
+	"""!@brief	Filters the given diagonal dictionary and returns a dictionary with ten diagonal runs with best value
 	"""
 	regions=listAllRegions(diagonals)
 	if len(regions)<=10:
@@ -171,8 +168,7 @@ def getDictWithTopRegions(diagonals):
 	return bestDiagonals
 	
 def scoreDiagonalRuns(diagonalDict, seq, seqRef,k, gapPenalty, reward):
-	"""
-	In order to evaluate each diagonal run, FASTA gives each hot spot a positive score,
+	"""!@brief	In order to evaluate each diagonal run, FASTA gives each hot spot a positive score,
 	and the space between consecutive hot spots in a run is given a negative score (gapPenalty) the score of the diagonal run is the sum of the hot spots scores and the interspot scores (only if the score with gaps is higher than without). FASTA finds the 10 highest scoring diagonal	runs under this evaluating scheme. Each diagonal may contain more than 1 diagonal run
 	
 	@param	diagonalDict	Dictionary where each diagonal (the key is the number of a diagonal, can be negative) has an array of diagonal runs associated with it
@@ -232,8 +228,7 @@ def scoreDiagonalRuns(diagonalDict, seq, seqRef,k, gapPenalty, reward):
 	return rescoredDiagonalsDict
 	
 def rescoreDiagonals(seq, seqRef, blosum, bestDiagonalsDict,k, cutoff):
-	"""
-	Rescore diagonal runs
+	"""!@brief	Rescore diagonal runs
 	
 	@param	seq 				Query sequence which will be compared against a reference sequence
 	@param	seqRef				Reference sequence
@@ -279,7 +274,7 @@ def rescoreDiagonals(seq, seqRef, blosum, bestDiagonalsDict,k, cutoff):
 	return bestRescoredDiagonals, init1
 	
 def createAlignmentString(alignedSeq, alignedSeqRef):
-    '''Construct a special string showing identities, gaps, and mismatches.
+    '''!@brief	Construct a special string showing identities, gaps, and mismatches.
 
     This string is printed between the two aligned sequences and shows the
     identities (|), gaps (-), and mismatches (:). As the string is constructed,
@@ -310,8 +305,7 @@ def createAlignmentString(alignedSeq, alignedSeqRef):
 
 
 def fastaScoreAlignment(seq, seqRef, k, gapPenalty=-10, rescoreCutoff=10, matchReward=20, blosum=""):
-	"""
-	Method calculating and scoring and alignment of two sequences using FastA algorithm
+	"""!@brief	Method calculating and scoring and alignment of two sequences using FastA algorithm
 	
 	@param	seq 			Query sequence which will be compared against a reference sequence
 	@param	seqRef			Reference sequence
@@ -390,8 +384,7 @@ def fastaScoreAlignment(seq, seqRef, k, gapPenalty=-10, rescoreCutoff=10, matchR
 	return init1.value, init_n, opt_score, seqAligned, seqRefAligned, alignedSeqRefStartIndex, len(seqRefAligned)
 	
 def readDb(fname):
-	"""
-	Method for reading reference sequences from a file to an array
+	"""!@brief	Read reference sequences from a file to an array
 	"""
 	lines = open(fname, "rt").readlines()
 	db=[]
@@ -401,8 +394,8 @@ def readDb(fname):
 	return db
 	
 def fasta(seq, k=2, gapPenalty=-10, rescoreCutoff=10, matchReward=20, db=[], blosum="" ):
-	"""
-	Method searching a database of reference DNA sequences
+	"""!@brief	Method searching a database of reference DNA sequences
+	
 	@param	seq 			Query sequence which will be compared against reference sequences
 	@param 	k				Length of tuples of nucleotides that the algorithm is looking for in any two sequences compared with each other. Should be between 2 and 6 for DNA sequences
 	@param	gapPenalty		Penalty for opening a gap. The penalty is linear. Must be negative.

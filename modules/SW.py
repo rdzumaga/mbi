@@ -1,4 +1,4 @@
-"""@package SW
+"""!@package SW
 Compute local alignement of two DNA sequences
 """
 
@@ -15,8 +15,7 @@ def createMatrix(rows, cols):
 	
 # Read the BLOSUM table
 def readBlosum(fname):
-    """
-    Read from file the Blosum table
+    """!@brief	    Read from file the Blosum table
     """
 	
     #dictionary holding pairs of nucleotides and their BLOSUM matrix value, e.g.: ('T', 'A'): -4
@@ -32,8 +31,7 @@ def readBlosum(fname):
     return d
 
 def createScoreMatrix(seq, seqRef, penalty, match, mismatch):
-    '''
-    Create a matrix and fill it with values representing possible alignments of two sequences
+    '''!@brief	Create a matrix and fill it with values representing possible alignments of two sequences
 
     Best alignment can be found by locating a path in the matrix with highest cumulative score.
 
@@ -70,7 +68,7 @@ def createScoreMatrix(seq, seqRef, penalty, match, mismatch):
     return scoreMatrix, bestPos
 
 def calcScore(seq, seqRef, matrix, i, j, penalty, match, mismatch):
-    '''Calculate score for a given position in the scoring matrix.
+    '''!@brief Calculate score for a given position in the scoring matrix.
 
     The score is based on the up, left, and upper-left neighbors.
     '''
@@ -83,8 +81,7 @@ def calcScore(seq, seqRef, matrix, i, j, penalty, match, mismatch):
     return max(0, diagScore, upScore, leftScore)
 
 def createMatrixStepByStep(step, seq, seqRef, penalty, match, mismatch):
-    """
-    Calculate the score matrix until idicated step is reached
+    """!@brief    Calculate the score matrix until idicated step is reached
 
     Parameters:
     @param  step       Number a steps to take when calculating the algorithm
@@ -134,7 +131,7 @@ def createMatrixStepByStep(step, seq, seqRef, penalty, match, mismatch):
     return scoreMatrix, steps
 
 def calcStep(steps, seq, seqRef, matrix, i, j, penalty, match, mismatch):
-    '''Calculate score for a given position in the scoring matrix.
+    '''!@briefCalculate score for a given position in the scoring matrix.
 
     The score is based on the up, left, and upper-left neighbors.
     best index can take on following values:
@@ -188,7 +185,7 @@ def calcStep(steps, seq, seqRef, matrix, i, j, penalty, match, mismatch):
     return steps, possibilities[bestIndex][0]
 	
 def traceback(scoreMatrix, startPos, seq, seqRef, penalty, match, mismatch):
-    '''Find the optimal path through the matrix representing the alignment.
+    '''!@briefFind the optimal path through the matrix representing the alignment.
 
     Starting from the best position (bottom right of a path), trace the whole path
     back up (top-left corner), finding thus the best local alignment. Each step of the path (matrix cell)
@@ -235,8 +232,7 @@ def traceback(scoreMatrix, startPos, seq, seqRef, penalty, match, mismatch):
     return ''.join(reversed(alignedSeq)), ''.join(reversed(alignedSeqRef))
 
 def nextStep(scoreMatrix, i, j, seq, seqRef, penalty, match, mismatch):
-    """
-	Calculate next step in the tracedback path
+    """!@brief	Calculate next step in the tracedback path
 	
 	Return:
 		1 - diagonal step
@@ -265,8 +261,7 @@ def nextStep(scoreMatrix, i, j, seq, seqRef, penalty, match, mismatch):
     return 0
 
 def createAlignmentString(alignedSeq, alignedSeqRef):
-    '''
-    Construct a special string showing identities, gaps, and mismatches.
+    '''!@brief	Construct a special string showing identities, gaps, and mismatches.
 
     This string is printed between the two aligned sequences and shows the
     identities (|), gaps (-), and mismatches (:). As the string is constructed,
@@ -295,8 +290,7 @@ def createAlignmentString(alignedSeq, alignedSeqRef):
     return ''.join(alignmentString), idents, gaps, mismatches
 
 def printMatrix(matrix,seq, seqRef):
-    """
-    Helper function for printing the score matrix and letters of both sequences on the console
+    """!@brief	Helper function for printing the score matrix and letters of both sequences on the console
     """
     
     #print ref sequence's nukleotides
@@ -321,8 +315,7 @@ def printMatrix(matrix,seq, seqRef):
         print
 
 def SmithWaterman(step=-1, seq="GACTTAC", seqRef="CGTGAATTCAT", penalty=-4, match=5, mismatch=-3):
-    """
-    Method calculating local alignment of two sequences.
+    """!@brief	Method calculating local alignment of two sequences.
     Parameters:
     @param  step	number of steps to take when calculating the score matrix. Each step move from cell F[i][j] to cell F[i][j+1] or F[i+1][0] when reached the end of a row. If step<0, the whole algorithm is executed, along with string alignements
     @param  seq	        string representing query DNA sequency
