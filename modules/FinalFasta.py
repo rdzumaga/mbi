@@ -402,11 +402,22 @@ def readDb(fname):
 def fasta(seq, k=2, gapPenalty=-10, rescoreCutoff=10, matchReward=20, db=[], blosum="" ):
 	"""
 	Method searching a database of reference DNA sequences
-	@param seq Query sequence which will be compared against reference sequences
-	@param  k Length of tuples of nucleotides that the algorithm is looking for in any two sequnces compared with each other
-	@param	restoreCutoff	A threshold for filtering out diagonal runs with too low of a score (during rescore stage using BLOSUM matrix)
-	
+	@param	seq 			Query sequence which will be compared against reference sequences
+	@param 	k				Length of tuples of nucleotides that the algorithm is looking for in any two sequences compared with each other. Should be between 2 and 6 for DNA sequences
+	@param	restoreCutoff	A threshold for filtering out diagonal runs with too low of a score (during rescore stage using BLOSUM matrix). Must be negative
+	@param	matchReward		Value used when scoring diagonal runs and two nucleotides matchReward
+	@param	db				An array containing reference sequences. In case nothing is entered for this parameter, a default database is read from a text file
+	@param	blosum			Name of the text file containing substitution matrix. In case nothing is entered, a default text file is read
+	@retval					An array of arrays containing results for comparison with each sequence from reference databas. Each sequence generates the following results:
+		init1 - best diagonal run after scoring previously found diagonal runs with substitution matrix (the diagonal run may contain mismatches)
+		init_n - best result achieved after chaining best diagonal runs (the result may contain indels and mismatches)
+		opt - result of Smith-Waterman algorithm for the init1 diagonal run
+		i - index of the referenece sequence in the database
+		refStartIndex - index of the first character in the reference sequence belonging to the alignment
+		length - length of the alignment found in the reference sequence
+		mismatched - number of mismatches in the alignment that was found
 	"""
+	
 	if len(db)==0:
 		db=readDb("db.txt")
 	
@@ -425,3 +436,4 @@ def fasta(seq, k=2, gapPenalty=-10, rescoreCutoff=10, matchReward=20, db=[], blo
 		
 		
 	return answer
+	
