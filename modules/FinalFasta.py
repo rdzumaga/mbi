@@ -401,7 +401,11 @@ def readDb(fname):
 	
 def fasta(seq, k=2, gapPenalty=-10, rescoreCutoff=10, matchReward=20, db=[], blosum="" ):
 	"""
-	Method searching a database of reference DNA sequences 
+	Method searching a database of reference DNA sequences
+	@param seq Query sequence which will be compared against reference sequences
+	@param  k Length of tuples of nucleotides that the algorithm is looking for in any two sequnces compared with each other
+	@param	restoreCutoff	A threshold for filtering out diagonal runs with too low of a score (during rescore stage using BLOSUM matrix)
+	
 	"""
 	if len(db)==0:
 		db=readDb("db.txt")
@@ -417,8 +421,7 @@ def fasta(seq, k=2, gapPenalty=-10, rescoreCutoff=10, matchReward=20, db=[], blo
 		if init1>=0:
 			answer.append([init1, init_n, opt, i, refStartIndex, length, mismatched])
 		else:
-			answer.appand(i)
+			answer.append([i])
 		
 		
 	return answer
-	
